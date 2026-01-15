@@ -3,6 +3,7 @@ import { sheets } from '../../lib/google.ts';
 
 export const sheetsTools = {
   get_spreadsheet: {
+    product: 'sheets' as const,
     description: 'Get spreadsheet metadata including sheet names',
     parameters: z.object({
       spreadsheetId: z.string().describe('The spreadsheet ID'),
@@ -22,6 +23,7 @@ export const sheetsTools = {
   },
 
   read_sheet: {
+    product: 'sheets' as const,
     description: 'Read data from a spreadsheet range',
     parameters: z.object({
       spreadsheetId: z.string().describe('The spreadsheet ID'),
@@ -39,6 +41,7 @@ export const sheetsTools = {
   },
 
   write_sheet: {
+    product: 'sheets' as const,
     description: 'Write data to a spreadsheet range (overwrites existing data)',
     parameters: z.object({
       spreadsheetId: z.string().describe('The spreadsheet ID'),
@@ -70,6 +73,7 @@ export const sheetsTools = {
   },
 
   append_rows: {
+    product: 'sheets' as const,
     description: 'Append rows to the end of a spreadsheet table',
     parameters: z.object({
       spreadsheetId: z.string().describe('The spreadsheet ID'),
@@ -101,6 +105,7 @@ export const sheetsTools = {
   },
 
   create_spreadsheet: {
+    product: 'sheets' as const,
     description: 'Create a new spreadsheet',
     parameters: z.object({
       title: z.string().describe('Title for the new spreadsheet'),

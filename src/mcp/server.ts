@@ -15,6 +15,20 @@ const allTools = {
 
 type ToolName = keyof typeof allTools;
 
+// Map products to their required scopes
+const productScopes: Record<string, string> = {
+  calendar: 'https://www.googleapis.com/auth/calendar',
+  sheets: 'https://www.googleapis.com/auth/spreadsheets',
+};
+
+// Filter tools based on authorized scopes
+function getAuthorizedTools(scopes: string[]) {
+  return Object.entries(allTools).filter(([_, tool]) => {
+    const requiredScope = productScopes[tool.product];
+    return scopes.includes(requiredScope);
+  });
+}
+
 export function createMcpServer() {
   const server = new Server(
     {
@@ -104,14 +118,15 @@ export interface McpHttpResponse {
 
 export async function handleMcpRequest(
   request: McpHttpRequest,
-  accessToken: string
+  accessToken: string,
+  scopes: string[]
 ): Promise<McpHttpResponse> {
-  const server = createMcpServer();
+  const authorizedTools = getAuthorizedTools(scopes);
 
   try {
     // Handle the request based on method
     if (request.method === 'tools/list') {
-      const tools = Object.entries(allTools).map(([name, tool]) => ({
+      const tools = authorizedTools.map(([name, tool]) => ({
         name,
         description: tool.description,
         inputSchema: z.toJSONSchema(tool.parameters),
@@ -136,6 +151,19 @@ export async function handleMcpRequest(
           error: {
             code: -32601,
             message: `Unknown tool: ${toolName}`,
+          },
+        };
+      }
+
+      // Check if user has access to this tool
+      const requiredScope = productScopes[tool.product];
+      if (!scopes.includes(requiredScope)) {
+        return {
+          jsonrpc: '2.0',
+          id: request.id,
+          error: {
+            code: -32001,
+            message: `Tool "${toolName}" requires ${tool.product} authorization`,
           },
         };
       }

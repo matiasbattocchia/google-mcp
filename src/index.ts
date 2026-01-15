@@ -153,6 +153,7 @@ app.post('/mcp', async (c) => {
   }
 
   let accessToken = record.google_access_token;
+  const scopes: string[] = JSON.parse(record.scopes);
 
   // Try to refresh token if needed (we'll detect this on API error)
   const refreshTokenIfNeeded = async () => {
@@ -184,14 +185,14 @@ app.post('/mcp', async (c) => {
   }
 
   // Handle the MCP request
-  let response = await handleMcpRequest(request, accessToken);
+  let response = await handleMcpRequest(request, accessToken, scopes);
 
   // If we got a Google API error that might be auth-related, try refreshing
   if (response.error?.message?.includes('401') || response.error?.message?.includes('403')) {
     const newToken = await refreshTokenIfNeeded();
     if (newToken) {
       accessToken = newToken;
-      response = await handleMcpRequest(request, accessToken);
+      response = await handleMcpRequest(request, accessToken, scopes);
     }
   }
 

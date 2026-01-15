@@ -3,6 +3,7 @@ import { calendar } from '../../lib/google.ts';
 
 export const calendarTools = {
   list_calendars: {
+    product: 'calendar' as const,
     description: 'List all calendars accessible to the user',
     parameters: z.object({}),
     execute: async (accessToken: string) => {
@@ -18,6 +19,7 @@ export const calendarTools = {
   },
 
   list_events: {
+    product: 'calendar' as const,
     description: 'List events from a calendar within a time range',
     parameters: z.object({
       calendarId: z.string().default('primary').describe('Calendar ID, defaults to primary calendar'),
@@ -57,6 +59,7 @@ export const calendarTools = {
   },
 
   create_event: {
+    product: 'calendar' as const,
     description: 'Create a new calendar event',
     parameters: z.object({
       calendarId: z.string().default('primary').describe('Calendar ID, defaults to primary calendar'),
@@ -97,6 +100,7 @@ export const calendarTools = {
   },
 
   update_event: {
+    product: 'calendar' as const,
     description: 'Update an existing calendar event',
     parameters: z.object({
       calendarId: z.string().default('primary').describe('Calendar ID'),
@@ -146,6 +150,7 @@ export const calendarTools = {
   },
 
   delete_event: {
+    product: 'calendar' as const,
     description: 'Delete a calendar event',
     parameters: z.object({
       calendarId: z.string().default('primary').describe('Calendar ID'),
