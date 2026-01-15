@@ -1,6 +1,7 @@
 {
   "name": "google-mcp",
   "version": "0.1.0",
+  "mcpName": "io.github.matiasbattocchia/google-mcp",
   "private": true,
   "type": "module",
   "scripts": {
