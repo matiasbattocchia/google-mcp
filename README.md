@@ -2,9 +2,23 @@
 
 A public [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) server that lets AI assistants access your Google Calendar and Sheets.
 
-## What is this?
+**Live at: https://google-mcp.battox.workers.dev**
 
-This server acts as a bridge between MCP-compatible AI clients (like Claude Desktop) and Google's APIs. Once connected, you can ask your AI assistant to:
+## Why this exists
+
+Most Google MCP servers require you to create your own Google Cloud project, set up OAuth credentials, and run a local server. This is tedious and error-prone.
+
+**This project is different.** It's a hosted public server with proxy OAuth. You just:
+
+1. Click "Login with Google"
+2. Get an API key
+3. Add it to your MCP client
+
+No Google Cloud setup. No local servers. No environment variables. Just connect and go.
+
+## What you can do
+
+Once connected, ask your AI assistant to:
 
 - List and search your calendar events
 - Create, update, or delete events
@@ -52,7 +66,7 @@ This server acts as a bridge between MCP-compatible AI clients (like Claude Desk
 
 **Option 1: Delete your API key**
 ```bash
-curl -X DELETE https://google-mcp.battox.com/key/YOUR_API_KEY
+curl -X DELETE https://google-mcp.battox.workers.dev/key/YOUR_API_KEY
 ```
 
 **Option 2: Revoke from Google**
@@ -70,7 +84,7 @@ After authenticating, add this to your MCP client configuration:
 {
   "mcpServers": {
     "google-mcp": {
-      "url": "https://google-mcp.battox.com/mcp",
+      "url": "https://google-mcp.battox.workers.dev/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_API_KEY"
       }
