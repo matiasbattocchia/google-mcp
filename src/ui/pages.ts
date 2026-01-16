@@ -238,9 +238,9 @@ export function renderHomePage(scopes: typeof GOOGLE_SCOPES): string {
     </form>
 
     <div class="footer-link">
-      <a href="/privacy-policy">Privacy Policy</a>
+      <a href="/privacy-policy" style="color: inherit;">Privacy Policy</a>
       <span style="margin: 0 8px;">•</span>
-      <a href="/terms-of-service">Terms of Service</a>
+      <a href="/terms-of-service" style="color: inherit;">Terms of Service</a>
     </div>
     <a href="https://github.com/matiasbattocchia/google-mcp" target="_blank" class="footer-link">
       ❤️ View source on GitHub
