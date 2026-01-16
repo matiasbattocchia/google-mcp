@@ -81,11 +81,17 @@ export const calendarTools = {
       location?: string;
       attendees?: string[];
     }) => {
+      // Detect all-day events (YYYY-MM-DD format) vs timed events
+      const isAllDay = (val: string) => /^\d{4}-\d{2}-\d{2}$/.test(val);
       const event = await calendar.createEvent({ accessToken }, params.calendarId, {
         summary: params.summary,
         description: params.description,
-        start: { dateTime: params.startDateTime, timeZone: params.timeZone },
-        end: { dateTime: params.endDateTime, timeZone: params.timeZone },
+        start: isAllDay(params.startDateTime)
+          ? { date: params.startDateTime }
+          : { dateTime: params.startDateTime, timeZone: params.timeZone },
+        end: isAllDay(params.endDateTime)
+          ? { date: params.endDateTime }
+          : { dateTime: params.endDateTime, timeZone: params.timeZone },
         location: params.location,
         attendees: params.attendees?.map((email) => ({ email })),
       });
@@ -126,11 +132,17 @@ export const calendarTools = {
       if (params.summary) updateData.summary = params.summary;
       if (params.description) updateData.description = params.description;
       if (params.location) updateData.location = params.location;
+      // Detect all-day events (YYYY-MM-DD format) vs timed events
+      const isAllDay = (val: string) => /^\d{4}-\d{2}-\d{2}$/.test(val);
       if (params.startDateTime) {
-        updateData.start = { dateTime: params.startDateTime, timeZone: params.timeZone };
+        updateData.start = isAllDay(params.startDateTime)
+          ? { date: params.startDateTime }
+          : { dateTime: params.startDateTime, timeZone: params.timeZone };
       }
       if (params.endDateTime) {
-        updateData.end = { dateTime: params.endDateTime, timeZone: params.timeZone };
+        updateData.end = isAllDay(params.endDateTime)
+          ? { date: params.endDateTime }
+          : { dateTime: params.endDateTime, timeZone: params.timeZone };
       }
 
       const event = await calendar.updateEvent(

@@ -152,7 +152,3 @@ Generate a new one by authenticating again. Old keys remain valid unless you rev
 
 **Does it cost anything?**
 This public instance is free. If you self-host, you'll pay for Cloudflare Workers (generous free tier available).
-
-## License
-
-MIT
