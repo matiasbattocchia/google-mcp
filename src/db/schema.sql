@@ -16,5 +16,6 @@ CREATE TABLE IF NOT EXISTS oauth_states (
   state TEXT PRIMARY KEY,
   scopes TEXT NOT NULL,  -- JSON array of requested scopes
   expiration TEXT NOT NULL DEFAULT 'never',
+  callback TEXT,         -- Optional callback URL for programmatic flows
   created_at INTEGER NOT NULL DEFAULT (unixepoch())
 );

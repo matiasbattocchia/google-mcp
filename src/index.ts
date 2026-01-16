@@ -52,8 +52,9 @@ app.get('/auth/google', async (c) => {
   }
 
   const expiration = c.req.query('expiration') ?? 'never';
+  const callback = c.req.query('callback'); // Optional callback URL for programmatic flows
   const scopes = expandScopes(validProducts);
-  const state = await createOAuthState(c.env.DB, scopes, expiration);
+  const state = await createOAuthState(c.env.DB, scopes, expiration, callback);
   const redirectUri = `${c.env.BASE_URL}/auth/callback`;
 
   const authUrl = getAuthUrl(c.env.GOOGLE_CLIENT_ID, redirectUri, state, scopes);
@@ -96,9 +97,27 @@ app.get('/auth/callback', async (c) => {
       expiresAt
     );
 
+    // If callback URL provided, redirect with API key in fragment
+    if (oauthState.callback) {
+      const callbackUrl = new URL(oauthState.callback);
+      const fragment = new URLSearchParams({
+        api_key: apiKey,
+        url: `${c.env.BASE_URL}/mcp`,
+      });
+      return c.redirect(`${callbackUrl.toString()}#${fragment.toString()}`);
+    }
+
     return c.html(renderSuccessPage(apiKey, c.env.BASE_URL));
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
+
+    // If callback URL provided, redirect with error in fragment
+    if (oauthState.callback) {
+      const callbackUrl = new URL(oauthState.callback);
+      const fragment = new URLSearchParams({ error: message });
+      return c.redirect(`${callbackUrl.toString()}#${fragment.toString()}`);
+    }
+
     return c.html(renderErrorPage(`Token exchange failed: ${message}`), 500);
   }
 });

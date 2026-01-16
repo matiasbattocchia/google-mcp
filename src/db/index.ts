@@ -96,14 +96,19 @@ export function expirationToTimestamp(expiration: string): number | null {
 }
 
 // OAuth state management
-export async function createOAuthState(db: D1Database, scopes: string[], expiration: string): Promise<string> {
+export async function createOAuthState(
+  db: D1Database,
+  scopes: string[],
+  expiration: string,
+  callback?: string
+): Promise<string> {
   const bytes = new Uint8Array(16);
   crypto.getRandomValues(bytes);
   const state = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
 
   await db.prepare(`
-    INSERT INTO oauth_states (state, scopes, expiration) VALUES (?, ?, ?)
-  `).bind(state, JSON.stringify(scopes), expiration).run();
+    INSERT INTO oauth_states (state, scopes, expiration, callback) VALUES (?, ?, ?, ?)
+  `).bind(state, JSON.stringify(scopes), expiration, callback ?? null).run();
 
   // Clean up old states (older than 10 minutes)
   await db.prepare(`
@@ -113,10 +118,16 @@ export async function createOAuthState(db: D1Database, scopes: string[], expirat
   return state;
 }
 
-export async function consumeOAuthState(db: D1Database, state: string): Promise<{ scopes: string[]; expiration: string } | null> {
+export interface ConsumedOAuthState {
+  scopes: string[];
+  expiration: string;
+  callback: string | null;
+}
+
+export async function consumeOAuthState(db: D1Database, state: string): Promise<ConsumedOAuthState | null> {
   const result = await db.prepare(`
-    SELECT scopes, expiration FROM oauth_states WHERE state = ?
-  `).bind(state).first<{ scopes: string; expiration: string }>();
+    SELECT scopes, expiration, callback FROM oauth_states WHERE state = ?
+  `).bind(state).first<{ scopes: string; expiration: string; callback: string | null }>();
 
   if (!result) return null;
 
@@ -124,5 +135,9 @@ export async function consumeOAuthState(db: D1Database, state: string): Promise<
     DELETE FROM oauth_states WHERE state = ?
   `).bind(state).run();
 
-  return { scopes: JSON.parse(result.scopes), expiration: result.expiration };
+  return {
+    scopes: JSON.parse(result.scopes),
+    expiration: result.expiration,
+    callback: result.callback,
+  };
 }
