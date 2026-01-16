@@ -2,7 +2,7 @@
 
 A public [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) server that lets AI assistants access your Google Calendar and Sheets.
 
-**Live at: https://google-mcp.battox.workers.dev**
+**Live at: https://google-mcp.openbsp.dev**
 
 ## Why this exists
 
@@ -66,7 +66,7 @@ Once connected, ask your AI assistant to:
 
 **Option 1: Delete your API key**
 ```bash
-curl -X DELETE https://google-mcp.battox.workers.dev/key/YOUR_API_KEY
+curl -X DELETE https://google-mcp.openbsp.dev/key/YOUR_API_KEY
 ```
 
 **Option 2: Revoke from Google**
@@ -84,7 +84,7 @@ After authenticating, add this to your MCP client configuration:
 {
   "mcpServers": {
     "google-mcp": {
-      "url": "https://google-mcp.battox.workers.dev/mcp",
+      "url": "https://google-mcp.openbsp.dev/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_API_KEY"
       }
@@ -98,13 +98,13 @@ After authenticating, add this to your MCP client configuration:
 MCP clients can automate the setup by redirecting users to:
 
 ```
-https://google-mcp.battox.workers.dev/auth/google?products=calendar,sheets&callback=YOUR_CALLBACK_URL
+https://google-mcp.openbsp.dev/auth/google?products=calendar,sheets&callback=YOUR_CALLBACK_URL
 ```
 
 After authentication, the user is redirected to your callback with credentials in the URL fragment:
 
 ```
-YOUR_CALLBACK_URL#api_key=gmc_xxx&url=https://google-mcp.battox.workers.dev/mcp
+YOUR_CALLBACK_URL#api_key=gmc_xxx&url=https://google-mcp.openbsp.dev/mcp
 ```
 
 ## Available Tools

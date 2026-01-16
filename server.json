@@ -10,11 +10,11 @@
   "remotes": [
     {
       "type": "streamable-http",
-      "url": "https://google-mcp.battox.workers.dev/mcp",
+      "url": "https://google-mcp.openbsp.dev/mcp",
       "headers": [
         {
           "name": "Authorization",
-          "description": "Bearer token with your API key from https://google-mcp.battox.workers.dev",
+          "description": "Bearer token with your API key from https://google-mcp.openbsp.dev",
           "isRequired": true,
           "isSecret": true
         }
