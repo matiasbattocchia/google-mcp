@@ -191,7 +191,7 @@ const baseStyles = `
     width: 14px;
     height: 14px;
     fill: currentColor;
-    vertical-align: middle;
+    vertical-align: -2px;
   }
   .footer-link svg {
     width: 16px;
