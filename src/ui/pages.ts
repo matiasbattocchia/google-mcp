@@ -504,7 +504,7 @@ export function renderTermsOfService(): string {
     </ul>
 
     <h2>Open source</h2>
-    <p>This project is open source under the MIT License. You can review the code, self-host your own instance, or contribute improvements on <a href="https://github.com/matiasbattocchia/google-mcp">GitHub</a>.</p>
+    <p>This project is open source under The Unlicense (public domain). You can review the code, self-host your own instance, or contribute improvements on <a href="https://github.com/matiasbattocchia/google-mcp">GitHub</a>.</p>
 
     <h2>Changes</h2>
     <p>We may update these terms. Continued use of the service constitutes acceptance of any changes.</p>
