@@ -19,7 +19,7 @@ import {
   expandScopes,
 } from './auth/google.ts';
 import { handleMcpRequest, type McpHttpRequest } from './mcp/server.ts';
-import { renderHomePage, renderSuccessPage, renderErrorPage } from './ui/pages.ts';
+import { renderHomePage, renderSuccessPage, renderErrorPage, renderPrivacyPolicy, renderTermsOfService } from './ui/pages.ts';
 
 type Bindings = Env & {
   GOOGLE_CLIENT_ID: string;
@@ -36,6 +36,10 @@ app.use('/mcp/*', cors());
 app.get('/', (c) => {
   return c.html(renderHomePage(GOOGLE_SCOPES));
 });
+
+// Legal pages
+app.get('/privacy-policy', (c) => c.html(renderPrivacyPolicy()));
+app.get('/terms-of-service', (c) => c.html(renderTermsOfService()));
 
 // Start OAuth flow
 app.get('/auth/google', async (c) => {

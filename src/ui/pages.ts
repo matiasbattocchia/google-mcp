@@ -332,6 +332,189 @@ export function renderSuccessPage(apiKey: string, baseUrl: string): string {
 </html>`;
 }
 
+const legalStyles = `
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0a0a0a;
+    color: #e5e5e5;
+    min-height: 100vh;
+    padding: 40px 20px;
+    line-height: 1.6;
+  }
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    background: #171717;
+    border-radius: 12px;
+    padding: 40px;
+    border: 1px solid #262626;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    color: #fff;
+  }
+  .updated {
+    color: #a3a3a3;
+    font-size: 14px;
+    margin-bottom: 32px;
+  }
+  p, ul {
+    color: #d4d4d4;
+    margin-bottom: 16px;
+  }
+  ul {
+    padding-left: 24px;
+  }
+  li {
+    margin-bottom: 8px;
+  }
+  a {
+    color: #3b82f6;
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+  .back {
+    display: inline-block;
+    margin-top: 32px;
+    color: #a3a3a3;
+  }
+`;
+
+export function renderPrivacyPolicy(): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - Google MCP Server</title>
+  <style>${legalStyles}</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: January 2026</p>
+
+    <h2>What we collect</h2>
+    <p>When you use Google MCP Server, we store:</p>
+    <ul>
+      <li><strong>API Key</strong> - A randomly generated key to authenticate your MCP client</li>
+      <li><strong>OAuth Tokens</strong> - Access and refresh tokens from Google to make API calls on your behalf</li>
+      <li><strong>Scopes</strong> - Which Google products you authorized (Calendar, Sheets)</li>
+    </ul>
+
+    <h2>What we don't collect</h2>
+    <ul>
+      <li>Your Google password</li>
+      <li>Your email address or personal information</li>
+      <li>Your calendar events or spreadsheet data</li>
+      <li>Usage logs or analytics</li>
+    </ul>
+
+    <h2>How your data flows</h2>
+    <p>When your AI assistant makes a request:</p>
+    <ul>
+      <li>Your MCP client sends the request to our server with your API key</li>
+      <li>We use your stored OAuth token to call Google's API</li>
+      <li>Google's response passes through our server to your client</li>
+      <li>We do not log, store, or inspect the content of these requests</li>
+    </ul>
+
+    <h2>Data retention</h2>
+    <ul>
+      <li><strong>API keys and tokens</strong> - Stored until you revoke them or they expire</li>
+      <li><strong>OAuth states</strong> - Temporary data deleted after 10 minutes</li>
+    </ul>
+
+    <h2>How to delete your data</h2>
+    <p>You can delete all your stored data at any time:</p>
+    <ul>
+      <li>Delete your API key: <code>curl -X DELETE https://google-mcp.openbsp.dev/key/YOUR_API_KEY</code></li>
+      <li>Revoke from Google: <a href="https://myaccount.google.com/permissions">Google Account Permissions</a></li>
+    </ul>
+
+    <h2>Third parties</h2>
+    <p>We use:</p>
+    <ul>
+      <li><strong>Cloudflare</strong> - Hosting and infrastructure</li>
+      <li><strong>Google APIs</strong> - Calendar and Sheets access</li>
+    </ul>
+    <p>We do not sell or share your data with any other third parties.</p>
+
+    <h2>Contact</h2>
+    <p>For questions about this policy, open an issue on <a href="https://github.com/matiasbattocchia/google-mcp">GitHub</a>.</p>
+
+    <a href="/" class="back">&larr; Back to home</a>
+  </div>
+</body>
+</html>`;
+}
+
+export function renderTermsOfService(): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Service - Google MCP Server</title>
+  <style>${legalStyles}</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Terms of Service</h1>
+    <p class="updated">Last updated: January 2026</p>
+
+    <h2>Service description</h2>
+    <p>Google MCP Server is a free, open-source service that connects MCP-compatible AI clients to Google Calendar and Google Sheets APIs.</p>
+
+    <h2>Acceptance</h2>
+    <p>By using this service, you agree to these terms. If you don't agree, please don't use the service.</p>
+
+    <h2>Your responsibilities</h2>
+    <ul>
+      <li>Keep your API key secure and don't share it publicly</li>
+      <li>Use the service in compliance with Google's Terms of Service</li>
+      <li>Don't use the service for any illegal or harmful purposes</li>
+      <li>Don't attempt to abuse, overload, or exploit the service</li>
+    </ul>
+
+    <h2>Service availability</h2>
+    <p>This service is provided "as is" without guarantees. We may:</p>
+    <ul>
+      <li>Modify or discontinue the service at any time</li>
+      <li>Implement rate limits or usage restrictions</li>
+      <li>Revoke API keys that violate these terms</li>
+    </ul>
+
+    <h2>Limitations</h2>
+    <ul>
+      <li>We are not responsible for any data loss or damages</li>
+      <li>We don't guarantee uptime or availability</li>
+      <li>We are not affiliated with Google or Anthropic</li>
+    </ul>
+
+    <h2>Open source</h2>
+    <p>This project is open source under the MIT License. You can review the code, self-host your own instance, or contribute improvements on <a href="https://github.com/matiasbattocchia/google-mcp">GitHub</a>.</p>
+
+    <h2>Changes</h2>
+    <p>We may update these terms. Continued use of the service constitutes acceptance of any changes.</p>
+
+    <a href="/" class="back">&larr; Back to home</a>
+  </div>
+</body>
+</html>`;
+}
+
 export function renderErrorPage(message: string): string {
   return `<!DOCTYPE html>
 <html lang="en">
