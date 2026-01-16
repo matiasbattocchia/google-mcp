@@ -169,6 +169,16 @@ const baseStyles = `
   .footer-link:hover {
     color: #e5e5e5;
   }
+  .legal-links a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .legal-links span {
+    margin: 0 8px;
+  }
+  .legal-links:hover a {
+    color: #e5e5e5;
+  }
   .footer-link svg {
     width: 16px;
     height: 16px;
@@ -237,10 +247,10 @@ export function renderHomePage(scopes: typeof GOOGLE_SCOPES): string {
       </button>
     </form>
 
-    <div class="footer-link">
-      <a href="/privacy-policy" style="color: inherit;">Privacy Policy</a>
-      <span style="margin: 0 8px;">•</span>
-      <a href="/terms-of-service" style="color: inherit;">Terms of Service</a>
+    <div class="footer-link legal-links">
+      <a href="/privacy-policy">Privacy Policy</a>
+      <span>•</span>
+      <a href="/terms-of-service">Terms of Service</a>
     </div>
     <a href="https://github.com/matiasbattocchia/google-mcp" target="_blank" class="footer-link">
       ❤️ View source on GitHub
