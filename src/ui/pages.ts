@@ -173,11 +173,11 @@ const baseStyles = `
     color: inherit;
     text-decoration: none;
   }
+  .legal-links a:hover {
+    color: #e5e5e5;
+  }
   .legal-links span {
     margin: 0 8px;
-  }
-  .legal-links:hover a {
-    color: #e5e5e5;
   }
   .footer-link svg {
     width: 16px;
