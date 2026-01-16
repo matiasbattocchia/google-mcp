@@ -93,6 +93,20 @@ After authenticating, add this to your MCP client configuration:
 }
 ```
 
+### Programmatic integration
+
+MCP clients can automate the setup by redirecting users to:
+
+```
+https://google-mcp.battox.workers.dev/auth/google?products=calendar,sheets&callback=YOUR_CALLBACK_URL
+```
+
+After authentication, the user is redirected to your callback with credentials in the URL fragment:
+
+```
+YOUR_CALLBACK_URL#api_key=gmc_xxx&url=https://google-mcp.battox.workers.dev/mcp
+```
+
 ## Available Tools
 
 ### Calendar
