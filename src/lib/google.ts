@@ -54,6 +54,10 @@ export const calendar = {
     }
   ) {
     const searchParams = new URLSearchParams();
+    // singleEvents=true expands recurring events into instances, required for proper time filtering
+    searchParams.set('singleEvents', 'true');
+    // orderBy=startTime is required when singleEvents=true
+    searchParams.set('orderBy', 'startTime');
     if (params?.timeMin) searchParams.set('timeMin', params.timeMin);
     if (params?.timeMax) searchParams.set('timeMax', params.timeMax);
     if (params?.maxResults) searchParams.set('maxResults', params.maxResults.toString());
