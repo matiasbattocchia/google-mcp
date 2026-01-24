@@ -30,6 +30,7 @@ type Bindings = Env & {
 const app = new Hono<{ Bindings: Bindings }>();
 
 // CORS for MCP clients
+app.use('/mcp', cors());
 app.use('/mcp/*', cors());
 
 // Home page - product selection UI
@@ -220,6 +221,30 @@ app.post('/mcp', async (c) => {
   }
 
   return c.json(response);
+});
+
+// Catch-all for /mcp - return 401 for missing auth instead of 404
+app.all('/mcp', (c) => {
+  const authHeader = c.req.header('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return c.json(
+      {
+        jsonrpc: '2.0',
+        id: null,
+        error: { code: -32001, message: 'Missing or invalid Authorization header' },
+      },
+      401
+    );
+  }
+  // Auth present but method not supported
+  return c.json(
+    {
+      jsonrpc: '2.0',
+      id: null,
+      error: { code: -32601, message: 'Method not allowed. Use POST.' },
+    },
+    405
+  );
 });
 
 // Health check
