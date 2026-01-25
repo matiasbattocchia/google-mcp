@@ -19,7 +19,7 @@ import {
   expandScopes,
 } from './auth/google.ts';
 import { handleMcpRequest, type McpHttpRequest } from './mcp/server.ts';
-import { renderHomePage, renderSuccessPage, renderErrorPage, renderPrivacyPolicy, renderTermsOfService } from './ui/pages.ts';
+import { renderHomePage, renderAuthPage, renderSuccessPage, renderErrorPage, renderPrivacyPolicy, renderTermsOfService } from './ui/pages.ts';
 
 type Bindings = Env & {
   GOOGLE_CLIENT_ID: string;
@@ -33,9 +33,14 @@ const app = new Hono<{ Bindings: Bindings }>();
 app.use('/mcp', cors());
 app.use('/mcp/*', cors());
 
-// Home page - product selection UI
+// Home page - informational
 app.get('/', (c) => {
-  return c.html(renderHomePage(GOOGLE_SCOPES));
+  return c.html(renderHomePage());
+});
+
+// Auth page - product selection UI
+app.get('/auth', (c) => {
+  return c.html(renderAuthPage(GOOGLE_SCOPES));
 });
 
 // Legal pages

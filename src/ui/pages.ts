@@ -207,7 +207,211 @@ const baseStyles = `
   }
 `;
 
-export function renderHomePage(scopes: typeof GOOGLE_SCOPES): string {
+const homepageStyles = `
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0a0a0a;
+    color: #e5e5e5;
+    min-height: 100vh;
+    padding: 40px 20px;
+    line-height: 1.6;
+  }
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .hero {
+    text-align: center;
+    padding: 60px 0;
+  }
+  .hero h1 {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .hero .subtitle {
+    font-size: 18px;
+    color: #a3a3a3;
+    margin-bottom: 32px;
+  }
+  .btn {
+    display: inline-block;
+    padding: 14px 32px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .btn:hover {
+    background: #2563eb;
+  }
+  .section {
+    background: #171717;
+    border-radius: 12px;
+    padding: 32px;
+    border: 1px solid #262626;
+    margin-bottom: 24px;
+  }
+  .section h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  .section p {
+    color: #a3a3a3;
+    margin-bottom: 16px;
+  }
+  .section ul {
+    color: #d4d4d4;
+    padding-left: 24px;
+  }
+  .section li {
+    margin-bottom: 8px;
+  }
+  .diagram {
+    background: #262626;
+    border-radius: 8px;
+    padding: 24px;
+    font-family: monospace;
+    font-size: 14px;
+    text-align: center;
+    margin: 16px 0;
+    overflow-x: auto;
+  }
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .feature {
+    background: #262626;
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .feature h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .feature p {
+    font-size: 14px;
+    color: #a3a3a3;
+    margin: 0 0 6px 0;
+  }
+  .feature p:last-child {
+    margin-bottom: 0;
+  }
+  .feature code {
+    color: #e5e5e5;
+    font-size: 13px;
+  }
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 40px;
+    font-size: 13px;
+    color: #a3a3a3;
+  }
+  .footer-links a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .footer-links a:hover {
+    color: #e5e5e5;
+  }
+  .footer-links span {
+    margin: 0 8px;
+  }
+  .footer-links svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+    vertical-align: -2px;
+  }
+`;
+
+export function renderHomePage(): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenBSP MCP for Google Workspace</title>
+  <style>${homepageStyles}</style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <h1>OpenBSP MCP for Google Workspace</h1>
+      <p class="subtitle">Let AI assistants access your Google Calendar and Sheets</p>
+      <a href="/auth" class="btn">Get Started</a>
+    </div>
+
+    <div class="section">
+      <h2>What is this?</h2>
+      <p>This is a hosted MCP server that connects AI assistants (like Claude) to your Google Calendar and Google Sheets. Once connected, you can ask your AI to check your schedule, create events, read spreadsheets, and more.</p>
+    </div>
+
+    <div class="section">
+      <h2>How it works</h2>
+      <p>1. You authenticate with Google and grant permissions for Calendar and/or Sheets</p>
+      <p>2. You receive an API key to configure your MCP client</p>
+      <p>3. Your AI assistant can now access your Google data through our server</p>
+    </div>
+
+    <div class="section">
+      <h2>Available tools</h2>
+      <div class="features">
+        <div class="feature">
+          <h3>Calendar</h3>
+          <p><code>list_calendars</code> - List all calendars</p>
+          <p><code>list_events</code> - Get events with date filters</p>
+          <p><code>create_event</code> - Create new events</p>
+          <p><code>update_event</code> - Modify existing events</p>
+          <p><code>delete_event</code> - Remove events</p>
+        </div>
+        <div class="feature">
+          <h3>Sheets</h3>
+          <p><code>get_spreadsheet</code> - Get spreadsheet metadata</p>
+          <p><code>read_sheet</code> - Read data from ranges</p>
+          <p><code>write_sheet</code> - Write data to ranges</p>
+          <p><code>append_rows</code> - Append rows to tables</p>
+          <p><code>create_spreadsheet</code> - Create new spreadsheets</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Privacy</h2>
+      <p>We take privacy seriously:</p>
+      <ul>
+        <li>We only store your API key and OAuth tokens</li>
+        <li>We don't log, store, or inspect your calendar events or spreadsheet data</li>
+        <li>You can revoke access at any time</li>
+        <li>The project is open source for full transparency</li>
+      </ul>
+    </div>
+
+    <div class="footer-links">
+      <a href="https://github.com/matiasbattocchia/google-mcp" target="_blank"><svg viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg> Source</a>
+      <span>•</span>
+      <a href="/privacy-policy">Privacy</a>
+      <span>•</span>
+      <a href="/terms-of-service">Terms</a>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+export function renderAuthPage(scopes: typeof GOOGLE_SCOPES): string {
   const products = Object.entries(scopes).map(([key, value]) => ({
     id: key,
     label: value.label,
@@ -219,13 +423,13 @@ export function renderHomePage(scopes: typeof GOOGLE_SCOPES): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Google MCP Server</title>
+  <title>Connect - OpenBSP MCP</title>
   <style>${baseStyles}</style>
 </head>
 <body>
   <div class="container">
-    <h1>Google MCP Server</h1>
-    <p class="subtitle">Connect your Google products to MCP clients</p>
+    <h1>Connect Google Workspace</h1>
+    <p class="subtitle">Select which products to connect</p>
 
     <form id="authForm" action="/auth/google" method="get">
       <div class="products">
@@ -312,7 +516,7 @@ export function renderSuccessPage(apiKey: string, baseUrl: string): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Success - Google MCP Server</title>
+  <title>Success - OpenBSP MCP</title>
   <style>${baseStyles}</style>
 </head>
 <body>
@@ -424,7 +628,7 @@ export function renderPrivacyPolicy(): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Privacy Policy - Google MCP Server</title>
+  <title>Privacy Policy - OpenBSP MCP</title>
   <style>${legalStyles}</style>
 </head>
 <body>
@@ -433,7 +637,7 @@ export function renderPrivacyPolicy(): string {
     <p class="updated">Last updated: January 2026</p>
 
     <h2>What we collect</h2>
-    <p>When you use Google MCP Server, we store:</p>
+    <p>When you use OpenBSP MCP, we store:</p>
     <ul>
       <li><strong>API Key</strong> - A randomly generated key to authenticate your MCP client</li>
       <li><strong>OAuth Tokens</strong> - Access and refresh tokens from Google to make API calls on your behalf</li>
@@ -466,7 +670,7 @@ export function renderPrivacyPolicy(): string {
     <h2>How to delete your data</h2>
     <p>You can delete all your stored data at any time:</p>
     <ul>
-      <li>Delete your API key: <code>curl -X DELETE https://google-mcp.openbsp.dev/key/YOUR_API_KEY</code></li>
+      <li>Delete your API key: <code>curl -X DELETE https://g.mcp.openbsp.dev/key/YOUR_API_KEY</code></li>
       <li>Revoke from Google: <a href="https://myaccount.google.com/permissions">Google Account Permissions</a></li>
     </ul>
 
@@ -493,7 +697,7 @@ export function renderTermsOfService(): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Terms of Service - Google MCP Server</title>
+  <title>Terms of Service - OpenBSP MCP</title>
   <style>${legalStyles}</style>
 </head>
 <body>
@@ -502,7 +706,7 @@ export function renderTermsOfService(): string {
     <p class="updated">Last updated: January 2026</p>
 
     <h2>Service description</h2>
-    <p>Google MCP Server is a free, open-source service that connects MCP-compatible AI clients to Google Calendar and Google Sheets APIs.</p>
+    <p>OpenBSP MCP is a free, open-source service that connects MCP-compatible AI clients to Google Calendar and Google Sheets APIs.</p>
 
     <h2>Acceptance</h2>
     <p>By using this service, you agree to these terms. If you don't agree, please don't use the service.</p>
@@ -548,7 +752,7 @@ export function renderErrorPage(message: string): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Error - Google MCP Server</title>
+  <title>Error - OpenBSP MCP</title>
   <style>${baseStyles}</style>
 </head>
 <body>

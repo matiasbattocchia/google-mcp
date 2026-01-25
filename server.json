@@ -1,20 +1,20 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.matiasbattocchia/google-mcp",
-  "description": "Public MCP server for Google Calendar and Sheets. No setup required—just login and connect.",
+  "description": "Streamable HTTP MCP server for Google Calendar and Sheets with OAuth login.",
   "repository": {
     "url": "https://github.com/matiasbattocchia/google-mcp",
     "source": "github"
   },
-  "version": "0.1.1",
+  "version": "0.1.2",
   "remotes": [
     {
       "type": "streamable-http",
-      "url": "https://google-mcp.openbsp.dev/mcp",
+      "url": "https://g.mcp.openbsp.dev/mcp",
       "headers": [
         {
           "name": "Authorization",
-          "description": "Bearer token with your API key from https://google-mcp.openbsp.dev",
+          "description": "Bearer token with your API key from https://g.mcp.openbsp.dev",
           "isRequired": true,
           "isSecret": true
         }
