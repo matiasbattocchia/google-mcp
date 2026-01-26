@@ -381,6 +381,7 @@ export function renderHomePage(): string {
         <div class="feature">
           <h3>Sheets</h3>
           <p><code>get_spreadsheet</code> - Get spreadsheet metadata</p>
+          <p><code>get_sheet_schema</code> - Get column names and types</p>
           <p><code>read_sheet</code> - Read data from ranges</p>
           <p><code>write_sheet</code> - Write data to ranges</p>
           <p><code>append_rows</code> - Append rows to tables</p>
