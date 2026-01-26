@@ -274,6 +274,13 @@ const homepageStyles = `
   .section li {
     margin-bottom: 8px;
   }
+  .section a {
+    color: #3b82f6;
+    text-decoration: none;
+  }
+  .section a:hover {
+    color: #60a5fa;
+  }
   .diagram {
     background: #262626;
     border-radius: 8px;
@@ -397,8 +404,8 @@ export function renderHomePage(): string {
       <ul>
         <li>We only store your API key and OAuth tokens</li>
         <li>We don't log, store, or inspect your calendar events or spreadsheet data</li>
-        <li>You can revoke access at any time</li>
-        <li>The project is open source for full transparency</li>
+        <li>You can <a href="/privacy-policy#delete">revoke access</a> at any time</li>
+        <li>The project is <a href="https://github.com/matiasbattocchia/google-mcp" target="_blank">open source</a> for full transparency</li>
       </ul>
     </div>
 
@@ -670,7 +677,7 @@ export function renderPrivacyPolicy(): string {
       <li><strong>OAuth states</strong> - Temporary data deleted after 10 minutes</li>
     </ul>
 
-    <h2>How to delete your data</h2>
+    <h2 id="delete">How to delete your data</h2>
     <p>You can delete all your stored data at any time:</p>
     <ul>
       <li>Delete your API key: <code>curl -X DELETE https://g.mcp.openbsp.dev/key/YOUR_API_KEY</code></li>
