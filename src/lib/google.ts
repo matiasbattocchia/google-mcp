@@ -43,6 +43,29 @@ export const calendar = {
     return handleResponse<{ items: CalendarListEntry[] }>(response);
   },
 
+  async freeBusy(
+    options: GoogleApiOptions,
+    params: {
+      timeMin: string;
+      timeMax: string;
+      calendarIds: string[];
+    }
+  ) {
+    const response = await googleFetch(
+      `${CALENDAR_API}/freeBusy`,
+      options,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          timeMin: params.timeMin,
+          timeMax: params.timeMax,
+          items: params.calendarIds.map((id) => ({ id })),
+        }),
+      }
+    );
+    return handleResponse<FreeBusyResponse>(response);
+  },
+
   async listEvents(
     options: GoogleApiOptions,
     calendarId: string,
@@ -71,10 +94,12 @@ export const calendar = {
   async createEvent(
     options: GoogleApiOptions,
     calendarId: string,
-    event: CreateEventRequest
+    event: CreateEventRequest,
+    sendUpdates?: SendUpdates
   ) {
+    const params = sendUpdates ? `?sendUpdates=${sendUpdates}` : '';
     const response = await googleFetch(
-      `${CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events`,
+      `${CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events${params}`,
       options,
       {
         method: 'POST',
@@ -212,7 +237,23 @@ export interface CreateEventRequest {
   end: { dateTime?: string; date?: string; timeZone?: string };
   location?: string;
   attendees?: { email: string }[];
+  guestsCanModify?: boolean;
+  guestsCanInviteOthers?: boolean;
+  guestsCanSeeOtherGuests?: boolean;
 }
+
+export interface FreeBusyResponse {
+  timeMin: string;
+  timeMax: string;
+  calendars: {
+    [calendarId: string]: {
+      busy: { start: string; end: string }[];
+      errors?: { domain: string; reason: string }[];
+    };
+  };
+}
+
+export type SendUpdates = 'all' | 'externalOnly' | 'none';
 
 export interface Spreadsheet {
   spreadsheetId: string;

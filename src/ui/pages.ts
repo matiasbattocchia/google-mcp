@@ -373,6 +373,7 @@ export function renderHomePage(): string {
           <h3>Calendar</h3>
           <p><code>list_calendars</code> - List all calendars</p>
           <p><code>list_events</code> - Get events with date filters</p>
+          <p><code>check_availability</code> - Check busy/free times</p>
           <p><code>create_event</code> - Create new events</p>
           <p><code>update_event</code> - Modify existing events</p>
           <p><code>delete_event</code> - Remove events</p>

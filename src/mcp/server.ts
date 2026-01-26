@@ -72,6 +72,9 @@ export function createMcpServer() {
       const params = tool.parameters.parse(request.params.arguments ?? {});
       const result = await tool.execute(accessToken, params as any);
 
+      // structuredContent must be an object, wrap arrays
+      const structuredContent = Array.isArray(result) ? { items: result } : result;
+
       return {
         content: [
           {
@@ -79,7 +82,7 @@ export function createMcpServer() {
             text: JSON.stringify(result, null, 2),
           },
         ],
-        structuredContent: result as Record<string, unknown>,
+        structuredContent: structuredContent as Record<string, unknown>,
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -172,6 +175,9 @@ export async function handleMcpRequest(
       const toolParams = tool.parameters.parse(params.arguments ?? {});
       const result = await tool.execute(accessToken, toolParams as any);
 
+      // structuredContent must be an object, wrap arrays
+      const structuredContent = Array.isArray(result) ? { items: result } : result;
+
       // Return structured content for programmatic access, plus text fallback
       return {
         jsonrpc: '2.0',
@@ -183,7 +189,7 @@ export async function handleMcpRequest(
               text: JSON.stringify(result, null, 2),
             },
           ],
-          structuredContent: result,
+          structuredContent,
         },
       };
     }

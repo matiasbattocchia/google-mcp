@@ -18,6 +18,34 @@ export const calendarTools = {
     },
   },
 
+  check_availability: {
+    product: 'calendar' as const,
+    description: 'Check calendar availability (busy/free times) without exposing event details',
+    parameters: z.object({
+      calendarId: z.string().default('primary').describe('Calendar ID to check'),
+      timeMin: z.string().describe('Start of time range in ISO 8601 format'),
+      timeMax: z.string().describe('End of time range in ISO 8601 format'),
+    }),
+    execute: async (accessToken: string, params: {
+      calendarId: string;
+      timeMin: string;
+      timeMax: string;
+    }) => {
+      const result = await calendar.freeBusy({ accessToken }, {
+        timeMin: params.timeMin,
+        timeMax: params.timeMax,
+        calendarIds: [params.calendarId],
+      });
+
+      const calendarData = result.calendars[params.calendarId];
+      if (!calendarData) {
+        return { error: 'Calendar not found or not accessible' };
+      }
+
+      return { busy: calendarData.busy };
+    },
+  },
+
   list_events: {
     product: 'calendar' as const,
     description: 'List events from a calendar within a time range',
@@ -60,7 +88,7 @@ export const calendarTools = {
 
   create_event: {
     product: 'calendar' as const,
-    description: 'Create a new calendar event',
+    description: 'Create a new calendar event. Attendees receive email invitations automatically.',
     parameters: z.object({
       calendarId: z.string().default('primary').describe('Calendar ID, defaults to primary calendar'),
       summary: z.string().describe('Event title'),
@@ -83,18 +111,26 @@ export const calendarTools = {
     }) => {
       // Detect all-day events (YYYY-MM-DD format) vs timed events
       const isAllDay = (val: string) => /^\d{4}-\d{2}-\d{2}$/.test(val);
-      const event = await calendar.createEvent({ accessToken }, params.calendarId, {
-        summary: params.summary,
-        description: params.description,
-        start: isAllDay(params.startDateTime)
-          ? { date: params.startDateTime }
-          : { dateTime: params.startDateTime, timeZone: params.timeZone },
-        end: isAllDay(params.endDateTime)
-          ? { date: params.endDateTime }
-          : { dateTime: params.endDateTime, timeZone: params.timeZone },
-        location: params.location,
-        attendees: params.attendees?.map((email) => ({ email })),
-      });
+      const event = await calendar.createEvent(
+        { accessToken },
+        params.calendarId,
+        {
+          summary: params.summary,
+          description: params.description,
+          start: isAllDay(params.startDateTime)
+            ? { date: params.startDateTime }
+            : { dateTime: params.startDateTime, timeZone: params.timeZone },
+          end: isAllDay(params.endDateTime)
+            ? { date: params.endDateTime }
+            : { dateTime: params.endDateTime, timeZone: params.timeZone },
+          location: params.location,
+          attendees: params.attendees?.map((email) => ({ email })),
+          guestsCanModify: false,
+          guestsCanInviteOthers: false,
+          guestsCanSeeOtherGuests: false,
+        },
+        'all'
+      );
       return {
         id: event.id,
         summary: event.summary,

@@ -115,6 +115,7 @@ YOUR_CALLBACK_URL#api_key=gmc_xxx&url=https://g.mcp.openbsp.dev/mcp
 |------|-------------|
 | `list_calendars` | List all your calendars |
 | `list_events` | Get events with optional date filters |
+| `check_availability` | Check busy/free times (no event details exposed) |
 | `create_event` | Create a new calendar event |
 | `update_event` | Update an existing event |
 | `delete_event` | Delete an event |
