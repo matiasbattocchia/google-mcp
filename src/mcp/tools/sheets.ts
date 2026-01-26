@@ -1,6 +1,85 @@
 import { z } from 'zod';
 import { sheets } from '../../lib/google.ts';
 
+// Normalize string: lowercase + remove accents
+function normalize(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+}
+
+// Parse numeric value from string or number
+function toNumber(value: unknown): number | null {
+  if (typeof value === 'number') return value;
+  if (typeof value !== 'string') return null;
+  const cleaned = value.replace(/,/g, '').trim();
+  const num = parseFloat(cleaned);
+  return isNaN(num) ? null : num;
+}
+
+// Filter operators
+type Operator = 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'gt' | 'lt' | 'gte' | 'lte' | 'between' | 'in' | 'isEmpty';
+
+interface Filter {
+  column: string | number;
+  operator: Operator;
+  value?: unknown;
+  neg?: boolean;
+}
+
+function matchesFilter(cellValue: unknown, filter: Filter): boolean {
+  const { operator, value, neg } = filter;
+
+  let result: boolean;
+
+  if (operator === 'isEmpty') {
+    result = cellValue === null || cellValue === undefined || cellValue === '';
+  } else if (operator === 'equals') {
+    result = normalize(cellValue) === normalize(value);
+  } else if (operator === 'contains') {
+    result = normalize(cellValue).includes(normalize(value));
+  } else if (operator === 'startsWith') {
+    result = normalize(cellValue).startsWith(normalize(value));
+  } else if (operator === 'endsWith') {
+    result = normalize(cellValue).endsWith(normalize(value));
+  } else if (operator === 'in') {
+    const list = Array.isArray(value) ? value : [value];
+    const normalizedCell = normalize(cellValue);
+    result = list.some((v) => normalize(v) === normalizedCell);
+  } else if (operator === 'gt' || operator === 'lt' || operator === 'gte' || operator === 'lte') {
+    const cellNum = toNumber(cellValue);
+    const filterNum = toNumber(value);
+    if (cellNum === null || filterNum === null) {
+      result = false;
+    } else if (operator === 'gt') {
+      result = cellNum > filterNum;
+    } else if (operator === 'lt') {
+      result = cellNum < filterNum;
+    } else if (operator === 'gte') {
+      result = cellNum >= filterNum;
+    } else {
+      result = cellNum <= filterNum;
+    }
+  } else if (operator === 'between') {
+    const cellNum = toNumber(cellValue);
+    const range = Array.isArray(value) ? value : [0, 0];
+    const min = toNumber(range[0]);
+    const max = toNumber(range[1]);
+    if (cellNum === null || min === null || max === null) {
+      result = false;
+    } else {
+      result = cellNum >= min && cellNum <= max;
+    }
+  } else {
+    result = false;
+  }
+
+  return neg ? !result : result;
+}
+
 // Type inference helpers
 function inferType(values: unknown[]): string {
   const nonEmpty = values.filter((v) => v !== null && v !== undefined && v !== '');
@@ -77,6 +156,81 @@ export const sheetsTools = {
       return {
         columns,
         sampleRowCount: dataRows.length,
+      };
+    },
+  },
+
+  search_rows: {
+    product: 'sheets' as const,
+    description: 'Search for rows matching filter criteria. All string comparisons are case-insensitive and accent-normalized.',
+    parameters: z.object({
+      spreadsheetId: z.string().describe('The spreadsheet ID'),
+      sheet: z.string().default('Sheet1').describe('Sheet name'),
+      filters: z.array(z.object({
+        column: z.union([z.string(), z.number()]).describe('Column name or index (0-based)'),
+        operator: z.enum(['equals', 'contains', 'startsWith', 'endsWith', 'gt', 'lt', 'gte', 'lte', 'between', 'in', 'isEmpty']).describe('Comparison operator'),
+        value: z.unknown().optional().describe('Value to compare (not needed for isEmpty)'),
+        neg: z.boolean().optional().describe('Negate the condition'),
+      })).describe('Filter conditions (AND logic)'),
+      maxRows: z.number().optional().default(1000).describe('Maximum rows to scan'),
+      maxResults: z.number().optional().default(100).describe('Maximum matching rows to return'),
+    }),
+    execute: async (accessToken: string, params: {
+      spreadsheetId: string;
+      sheet: string;
+      filters: Filter[];
+      maxRows: number;
+      maxResults: number;
+    }) => {
+      // Read header + data rows
+      const range = `${params.sheet}!1:${params.maxRows + 1}`;
+      const result = await sheets.readRange({ accessToken }, params.spreadsheetId, range);
+
+      const rows = result.values ?? [];
+      if (rows.length === 0) {
+        return { matches: [], error: 'Sheet is empty' };
+      }
+
+      const headers = rows[0] as string[];
+      const dataRows = rows.slice(1);
+
+      // Resolve column names to indices
+      const resolvedFilters = params.filters.map((f) => ({
+        ...f,
+        columnIndex: typeof f.column === 'number'
+          ? f.column
+          : headers.findIndex((h) => normalize(h) === normalize(f.column)),
+      }));
+
+      // Check for invalid column references
+      const invalidFilter = resolvedFilters.find((f) => f.columnIndex === -1);
+      if (invalidFilter) {
+        return { matches: [], error: `Column not found: ${invalidFilter.column}` };
+      }
+
+      // Filter rows
+      const matches: { rowIndex: number; data: Record<string, unknown> }[] = [];
+
+      for (let i = 0; i < dataRows.length && matches.length < params.maxResults; i++) {
+        const row = dataRows[i];
+        const allMatch = resolvedFilters.every((f) =>
+          matchesFilter(row[f.columnIndex], f)
+        );
+
+        if (allMatch) {
+          // Convert row to object with column names
+          const data: Record<string, unknown> = {};
+          headers.forEach((header, idx) => {
+            data[header] = row[idx] ?? null;
+          });
+          matches.push({ rowIndex: i + 2, data }); // +2 for 1-indexed + header row
+        }
+      }
+
+      return {
+        matches,
+        scannedRows: dataRows.length,
+        matchCount: matches.length,
       };
     },
   },

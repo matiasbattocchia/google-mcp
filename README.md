@@ -126,6 +126,7 @@ YOUR_CALLBACK_URL#api_key=gmc_xxx&url=https://g.mcp.openbsp.dev/mcp
 |------|-------------|
 | `get_spreadsheet` | Get spreadsheet metadata by ID |
 | `get_sheet_schema` | Get column names and inferred types |
+| `search_rows` | Search for rows matching filter criteria |
 | `read_sheet` | Read data from a range (e.g., "A1:D10") |
 | `write_sheet` | Write data to a range |
 | `append_rows` | Append rows to a table |
