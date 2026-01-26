@@ -160,6 +160,88 @@ export const sheetsTools = {
     },
   },
 
+  describe_sheet: {
+    product: 'sheets' as const,
+    description: 'Get a statistical summary of all columns in a sheet (like pandas describe). Shows types, unique values, top values for categorical columns, and min/max for numeric columns.',
+    parameters: z.object({
+      spreadsheetId: z.string().describe('The spreadsheet ID'),
+      sheet: z.string().default('Sheet1').describe('Sheet name'),
+      maxRows: z.number().optional().default(1000).describe('Maximum rows to analyze'),
+      topValuesLimit: z.number().optional().default(5).describe('Number of top values to show per column'),
+    }),
+    execute: async (accessToken: string, params: {
+      spreadsheetId: string;
+      sheet: string;
+      maxRows: number;
+      topValuesLimit: number;
+    }) => {
+      const range = `${params.sheet}!1:${params.maxRows + 1}`;
+      const result = await sheets.readRange({ accessToken }, params.spreadsheetId, range);
+
+      const rows = result.values ?? [];
+      if (rows.length === 0) {
+        return { columns: [], error: 'Sheet is empty' };
+      }
+
+      const headers = rows[0] as string[];
+      const dataRows = rows.slice(1);
+
+      const columns = headers.map((name, index) => {
+        const columnValues = dataRows.map((row) => row[index]);
+        const type = inferType(columnValues);
+
+        // Count empty values
+        const emptyCount = columnValues.filter(
+          (v) => v === null || v === undefined || v === ''
+        ).length;
+
+        // Get unique values and their counts
+        const valueCounts = new Map<string, number>();
+        for (const v of columnValues) {
+          if (v === null || v === undefined || v === '') continue;
+          const key = String(v);
+          valueCounts.set(key, (valueCounts.get(key) ?? 0) + 1);
+        }
+
+        const uniqueCount = valueCounts.size;
+
+        // Sort by frequency and get top values
+        const sorted = [...valueCounts.entries()].sort((a, b) => b[1] - a[1]);
+        const topValues = sorted.slice(0, params.topValuesLimit).map(([value, count]) => ({
+          value,
+          count,
+        }));
+
+        const columnInfo: Record<string, unknown> = {
+          name: name ?? `Column ${index + 1}`,
+          type,
+          uniqueCount,
+          emptyCount,
+          topValues,
+        };
+
+        // Add numeric stats if applicable
+        if (type === 'number') {
+          const numbers = columnValues
+            .map((v) => toNumber(v))
+            .filter((n): n is number => n !== null);
+
+          if (numbers.length > 0) {
+            columnInfo.min = Math.min(...numbers);
+            columnInfo.max = Math.max(...numbers);
+          }
+        }
+
+        return columnInfo;
+      });
+
+      return {
+        rowCount: dataRows.length,
+        columns,
+      };
+    },
+  },
+
   search_rows: {
     product: 'sheets' as const,
     description: 'Search for rows matching filter criteria. All string comparisons are case-insensitive and accent-normalized.',

@@ -389,6 +389,7 @@ export function renderHomePage(): string {
           <h3>Sheets</h3>
           <p><code>get_spreadsheet</code> - Get spreadsheet metadata</p>
           <p><code>get_sheet_schema</code> - Get column names and types</p>
+          <p><code>describe_sheet</code> - Get statistical summary</p>
           <p><code>search_rows</code> - Search rows with filters</p>
           <p><code>read_sheet</code> - Read data from ranges</p>
           <p><code>write_sheet</code> - Write data to ranges</p>
