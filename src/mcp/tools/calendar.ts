@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { calendar } from '../../lib/google.ts';
+import { calendar, EVENT_COLORS, type EventColor } from '../../lib/google.ts';
 
 export const calendarTools = {
   list_calendars: {
@@ -98,6 +98,7 @@ export const calendarTools = {
       timeZone: z.string().optional().describe('Time zone (e.g., America/New_York)'),
       location: z.string().optional().describe('Event location'),
       attendees: z.array(z.string()).optional().describe('List of attendee email addresses'),
+      color: z.enum(['lavender', 'sage', 'grape', 'flamingo', 'banana', 'tangerine', 'peacock', 'graphite', 'blueberry', 'basil', 'tomato']).optional().describe('Event color'),
     }),
     execute: async (accessToken: string, params: {
       calendarId: string;
@@ -108,6 +109,7 @@ export const calendarTools = {
       timeZone?: string;
       location?: string;
       attendees?: string[];
+      color?: EventColor;
     }) => {
       // Detect all-day events (YYYY-MM-DD format) vs timed events
       const isAllDay = (val: string) => /^\d{4}-\d{2}-\d{2}$/.test(val);
@@ -128,6 +130,7 @@ export const calendarTools = {
           guestsCanModify: false,
           guestsCanInviteOthers: false,
           guestsCanSeeOtherGuests: false,
+          colorId: params.color ? EVENT_COLORS[params.color] : undefined,
         },
         'all'
       );
@@ -153,6 +156,7 @@ export const calendarTools = {
       endDateTime: z.string().optional().describe('New end time in ISO 8601 format'),
       timeZone: z.string().optional().describe('Time zone'),
       location: z.string().optional().describe('New event location'),
+      color: z.enum(['lavender', 'sage', 'grape', 'flamingo', 'banana', 'tangerine', 'peacock', 'graphite', 'blueberry', 'basil', 'tomato']).optional().describe('Event color'),
     }),
     execute: async (accessToken: string, params: {
       calendarId: string;
@@ -163,11 +167,13 @@ export const calendarTools = {
       endDateTime?: string;
       timeZone?: string;
       location?: string;
+      color?: EventColor;
     }) => {
       const updateData: Record<string, unknown> = {};
       if (params.summary) updateData.summary = params.summary;
       if (params.description) updateData.description = params.description;
       if (params.location) updateData.location = params.location;
+      if (params.color) updateData.colorId = EVENT_COLORS[params.color];
       // Detect all-day events (YYYY-MM-DD format) vs timed events
       const isAllDay = (val: string) => /^\d{4}-\d{2}-\d{2}$/.test(val);
       if (params.startDateTime) {
