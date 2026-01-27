@@ -25,6 +25,7 @@ type Bindings = Env & {
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;
   BASE_URL: string;
+  ENCRYPTION_KEY?: string; // Optional: AES-256 key for encrypting OAuth tokens
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -104,7 +105,8 @@ app.get('/auth/callback', async (c) => {
       c.env.DB,
       { access_token: tokens.access_token, refresh_token: tokens.refresh_token },
       oauthState.scopes,
-      expiresAt
+      expiresAt,
+      c.env.ENCRYPTION_KEY
     );
 
     // If callback URL provided, redirect with API key in fragment
@@ -136,7 +138,7 @@ app.get('/auth/callback', async (c) => {
 app.delete('/key/:apiKey', async (c) => {
   const apiKey = c.req.param('apiKey');
 
-  const record = await getApiKeyRecord(c.env.DB, apiKey);
+  const record = await getApiKeyRecord(c.env.DB, apiKey, c.env.ENCRYPTION_KEY);
   if (!record) {
     return c.json({ error: 'API key not found' }, 404);
   }
@@ -168,7 +170,7 @@ app.post('/mcp', async (c) => {
   }
 
   const apiKey = authHeader.slice(7);
-  const record = await getApiKeyRecord(c.env.DB, apiKey);
+  const record = await getApiKeyRecord(c.env.DB, apiKey, c.env.ENCRYPTION_KEY);
 
   if (!record) {
     return c.json(
@@ -192,7 +194,7 @@ app.post('/mcp', async (c) => {
         c.env.GOOGLE_CLIENT_ID,
         c.env.GOOGLE_CLIENT_SECRET
       );
-      await updateTokens(c.env.DB, apiKey, { access_token: newTokens.access_token });
+      await updateTokens(c.env.DB, apiKey, { access_token: newTokens.access_token }, c.env.ENCRYPTION_KEY);
       return newTokens.access_token;
     } catch {
       return null;

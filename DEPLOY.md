@@ -57,7 +57,19 @@ npm run db:migrate:prod
 npx wrangler secret put GOOGLE_CLIENT_ID
 npx wrangler secret put GOOGLE_CLIENT_SECRET
 npx wrangler secret put BASE_URL  # e.g., https://google-mcp.your-subdomain.workers.dev
+npx wrangler secret put ENCRYPTION_KEY  # See below for generating
 ```
+
+### Generate Encryption Key
+
+The `ENCRYPTION_KEY` is used to encrypt OAuth tokens at rest. Generate a secure 256-bit key:
+
+```bash
+# Generate a random 32-byte key, base64 encoded
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
+Copy the output and use it when prompted for `ENCRYPTION_KEY`.
 
 ## 5. Deploy
 
@@ -78,6 +90,7 @@ cat > .dev.vars << EOF
 GOOGLE_CLIENT_ID=your-client-id
 GOOGLE_CLIENT_SECRET=your-client-secret
 BASE_URL=http://localhost:8787
+ENCRYPTION_KEY=$(node -e "console.log(require('crypto').randomBytes(32).toString('base64'))")
 EOF
 
 # Run locally
@@ -86,11 +99,12 @@ npm run dev
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `GOOGLE_CLIENT_ID` | OAuth client ID from Google Cloud |
-| `GOOGLE_CLIENT_SECRET` | OAuth client secret from Google Cloud |
-| `BASE_URL` | Your deployment URL (for OAuth redirect) |
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `GOOGLE_CLIENT_ID` | OAuth client ID from Google Cloud | Yes |
+| `GOOGLE_CLIENT_SECRET` | OAuth client secret from Google Cloud | Yes |
+| `BASE_URL` | Your deployment URL (for OAuth redirect) | Yes |
+| `ENCRYPTION_KEY` | AES-256 key for encrypting OAuth tokens (base64) | Recommended |
 
 ## Updating
 

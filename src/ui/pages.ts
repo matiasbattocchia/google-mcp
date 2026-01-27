@@ -650,10 +650,11 @@ export function renderPrivacyPolicy(): string {
     <h2>What we collect</h2>
     <p>When you use OpenBSP MCP, we store:</p>
     <ul>
-      <li><strong>API Key</strong> - A randomly generated key to authenticate your MCP client</li>
-      <li><strong>OAuth Tokens</strong> - Access and refresh tokens from Google to make API calls on your behalf</li>
+      <li><strong>API Key</strong> - A randomly generated 256-bit key to authenticate your MCP client</li>
+      <li><strong>OAuth Tokens</strong> - Access and refresh tokens from Google, encrypted at rest using AES-256-GCM</li>
       <li><strong>Scopes</strong> - Which Google products you authorized (Calendar, Sheets)</li>
     </ul>
+    <p>OAuth tokens are encrypted with a key stored separately from the database. A database breach alone cannot expose your Google credentials.</p>
 
     <h2>What we don't collect</h2>
     <ul>

@@ -43,11 +43,13 @@ Once connected, ask your AI assistant to:
 
 ### What we store
 
-| Data | Purpose | Encrypted |
-|------|---------|-----------|
-| API Key | Authenticate your MCP client | Hashed |
-| OAuth Tokens | Access Google APIs on your behalf | Yes |
-| Scopes | Remember which products you authorized | No |
+| Data | Purpose | Protection |
+|------|---------|------------|
+| API Key | Authenticate your MCP client | Stored as-is (random 256-bit value) |
+| OAuth Tokens | Access Google APIs on your behalf | AES-256-GCM encrypted |
+| Scopes | Remember which products you authorized | Not encrypted |
+
+OAuth tokens are encrypted at rest using AES-256-GCM. The encryption key is stored separately from the database, so a database breach alone cannot expose your Google tokens.
 
 ### What we DON'T store
 
