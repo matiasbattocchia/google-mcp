@@ -104,7 +104,7 @@ npm run dev
 | `GOOGLE_CLIENT_ID` | OAuth client ID from Google Cloud | Yes |
 | `GOOGLE_CLIENT_SECRET` | OAuth client secret from Google Cloud | Yes |
 | `BASE_URL` | Your deployment URL (for OAuth redirect) | Yes |
-| `ENCRYPTION_KEY` | AES-256 key for encrypting OAuth tokens (base64) | Recommended |
+| `ENCRYPTION_KEY` | AES-256 key for encrypting OAuth tokens (base64) | Yes |
 
 ## Updating
 

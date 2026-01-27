@@ -26,17 +26,13 @@ export async function createApiKey(
   tokens: { access_token: string; refresh_token: string },
   scopes: string[],
   expiresAt: number | null = null,
-  encryptionKey?: string
+  encryptionKey: string
 ): Promise<string> {
   const apiKey = generateApiKey();
 
-  // Encrypt tokens if encryption key is provided
-  const accessToken = encryptionKey
-    ? await encrypt(tokens.access_token, encryptionKey)
-    : tokens.access_token;
-  const refreshToken = encryptionKey
-    ? await encrypt(tokens.refresh_token, encryptionKey)
-    : tokens.refresh_token;
+  // Encrypt tokens before storing
+  const accessToken = await encrypt(tokens.access_token, encryptionKey);
+  const refreshToken = await encrypt(tokens.refresh_token, encryptionKey);
 
   await db.prepare(`
     INSERT INTO api_keys (api_key, google_access_token, google_refresh_token, scopes, expires_at)
@@ -55,7 +51,7 @@ export async function createApiKey(
 export async function getApiKeyRecord(
   db: D1Database,
   apiKey: string,
-  encryptionKey?: string
+  encryptionKey: string
 ): Promise<ApiKeyRecord | null> {
   const result = await db.prepare(`
     SELECT * FROM api_keys WHERE api_key = ?
@@ -69,15 +65,9 @@ export async function getApiKeyRecord(
     return null;
   }
 
-  // Decrypt tokens if encryption key is provided
-  if (encryptionKey) {
-    try {
-      result.google_access_token = await decrypt(result.google_access_token, encryptionKey);
-      result.google_refresh_token = await decrypt(result.google_refresh_token, encryptionKey);
-    } catch {
-      // Token might be unencrypted (legacy) - return as-is
-    }
-  }
+  // Decrypt tokens
+  result.google_access_token = await decrypt(result.google_access_token, encryptionKey);
+  result.google_refresh_token = await decrypt(result.google_refresh_token, encryptionKey);
 
   return result;
 }
@@ -86,17 +76,13 @@ export async function updateTokens(
   db: D1Database,
   apiKey: string,
   tokens: { access_token: string; refresh_token?: string },
-  encryptionKey?: string
+  encryptionKey: string
 ): Promise<void> {
-  // Encrypt tokens if encryption key is provided
-  const accessToken = encryptionKey
-    ? await encrypt(tokens.access_token, encryptionKey)
-    : tokens.access_token;
+  // Encrypt tokens before storing
+  const accessToken = await encrypt(tokens.access_token, encryptionKey);
 
   if (tokens.refresh_token) {
-    const refreshToken = encryptionKey
-      ? await encrypt(tokens.refresh_token, encryptionKey)
-      : tokens.refresh_token;
+    const refreshToken = await encrypt(tokens.refresh_token, encryptionKey);
     await db.prepare(`
       UPDATE api_keys SET google_access_token = ?, google_refresh_token = ? WHERE api_key = ?
     `).bind(accessToken, refreshToken, apiKey).run();

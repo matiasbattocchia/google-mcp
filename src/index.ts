@@ -25,7 +25,7 @@ type Bindings = Env & {
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;
   BASE_URL: string;
-  ENCRYPTION_KEY?: string; // Optional: AES-256 key for encrypting OAuth tokens
+  ENCRYPTION_KEY: string; // AES-256 key for encrypting OAuth tokens (required)
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
