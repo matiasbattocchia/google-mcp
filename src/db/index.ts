@@ -142,22 +142,117 @@ export interface ConsumedOAuthState {
   scopes: string[];
   expiration: string;
   callback: string | null;
+  apiKey: string | null;
 }
 
-export async function consumeOAuthState(db: D1Database, state: string): Promise<ConsumedOAuthState | null> {
+// Get OAuth state without consuming it (for multi-step flows)
+export async function getOAuthState(db: D1Database, state: string): Promise<ConsumedOAuthState | null> {
   const result = await db.prepare(`
-    SELECT scopes, expiration, callback FROM oauth_states WHERE state = ?
-  `).bind(state).first<{ scopes: string; expiration: string; callback: string | null }>();
+    SELECT scopes, expiration, callback, api_key FROM oauth_states WHERE state = ?
+  `).bind(state).first<{ scopes: string; expiration: string; callback: string | null; api_key: string | null }>();
 
+  if (!result) return null;
+
+  // Check if expired (10 minutes)
+  return {
+    scopes: JSON.parse(result.scopes),
+    expiration: result.expiration,
+    callback: result.callback,
+    apiKey: result.api_key,
+  };
+}
+
+// Update OAuth state with API key (after token exchange, before file selection)
+export async function updateOAuthStateApiKey(db: D1Database, state: string, apiKey: string): Promise<void> {
+  await db.prepare(`
+    UPDATE oauth_states SET api_key = ? WHERE state = ?
+  `).bind(apiKey, state).run();
+}
+
+// Consume OAuth state (delete it and return data)
+export async function consumeOAuthState(db: D1Database, state: string): Promise<ConsumedOAuthState | null> {
+  const result = await getOAuthState(db, state);
   if (!result) return null;
 
   await db.prepare(`
     DELETE FROM oauth_states WHERE state = ?
   `).bind(state).run();
 
-  return {
-    scopes: JSON.parse(result.scopes),
-    expiration: result.expiration,
-    callback: result.callback,
-  };
+  return result;
+}
+
+// Authorized files management
+export interface AuthorizedFile {
+  fileId: string;
+  fileName: string | null;
+  mimeType: string | null;
+  addedAt: number;
+}
+
+export async function saveAuthorizedFiles(
+  db: D1Database,
+  apiKey: string,
+  files: { id: string; name: string; mimeType: string }[]
+): Promise<void> {
+  if (files.length === 0) return;
+
+  // Insert files (ignore duplicates)
+  for (const file of files) {
+    await db.prepare(`
+      INSERT OR IGNORE INTO authorized_files (api_key, file_id, file_name, mime_type)
+      VALUES (?, ?, ?, ?)
+    `).bind(apiKey, file.id, file.name, file.mimeType).run();
+  }
+}
+
+export async function getAuthorizedFiles(
+  db: D1Database,
+  apiKey: string,
+  mimeType?: string
+): Promise<AuthorizedFile[]> {
+  let query = `SELECT file_id, file_name, mime_type, added_at FROM authorized_files WHERE api_key = ?`;
+  const params: string[] = [apiKey];
+
+  if (mimeType) {
+    query += ` AND mime_type = ?`;
+    params.push(mimeType);
+  }
+
+  const result = await db.prepare(query).bind(...params).all<{
+    file_id: string;
+    file_name: string | null;
+    mime_type: string | null;
+    added_at: number;
+  }>();
+
+  return (result.results ?? []).map(row => ({
+    fileId: row.file_id,
+    fileName: row.file_name,
+    mimeType: row.mime_type,
+    addedAt: row.added_at,
+  }));
+}
+
+export async function hasAuthorizedFileType(
+  db: D1Database,
+  apiKey: string,
+  mimeType: string
+): Promise<boolean> {
+  const result = await db.prepare(`
+    SELECT 1 FROM authorized_files WHERE api_key = ? AND mime_type = ? LIMIT 1
+  `).bind(apiKey, mimeType).first();
+
+  return result !== null;
+}
+
+export async function isFileAuthorized(
+  db: D1Database,
+  apiKey: string,
+  fileId: string
+): Promise<boolean> {
+  const result = await db.prepare(`
+    SELECT 1 FROM authorized_files WHERE api_key = ? AND file_id = ? LIMIT 1
+  `).bind(apiKey, fileId).first();
+
+  return result !== null;
 }

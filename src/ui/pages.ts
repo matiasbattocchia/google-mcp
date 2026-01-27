@@ -574,6 +574,83 @@ export function renderSuccessPage(apiKey: string, baseUrl: string): string {
 </html>`;
 }
 
+// Success page that reads API key from URL fragment (for file picker flow)
+export function renderSuccessPageFromFragment(): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Success - OpenBSP MCP</title>
+  <style>${baseStyles}</style>
+</head>
+<body>
+  <div class="container text-center">
+    <div class="success-icon">
+      <svg class="icon-svg" viewBox="0 0 24 24">
+        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+      </svg>
+    </div>
+
+    <h1>Connected!</h1>
+    <p class="subtitle">Your API key has been generated</p>
+
+    <div class="api-key" id="apiKey">Loading...</div>
+
+    <button class="btn copy-btn" id="copyKeyBtn">Copy API Key</button>
+
+    <div class="config-example">
+      <p style="color: #a3a3a3; margin-bottom: 8px; font-family: sans-serif;">MCP Client Config:</p>
+      <pre id="config">Loading...</pre>
+    </div>
+
+    <button class="btn copy-btn" id="copyConfigBtn">Copy Config</button>
+
+    <p style="color: #a3a3a3; margin-top: 24px; font-size: 13px;">
+      Save this key securely. It won't be shown again.
+    </p>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    const apiKey = params.get('api_key');
+    const baseUrl = params.get('base_url');
+
+    if (!apiKey || !baseUrl) {
+      document.body.innerHTML = '<div class="container text-center"><h1>Error</h1><p>Missing API key</p></div>';
+    } else {
+      document.getElementById('apiKey').textContent = apiKey;
+
+      const mcpConfig = {
+        mcpServers: {
+          'google-mcp': {
+            url: baseUrl + '/mcp',
+            headers: {
+              Authorization: 'Bearer ' + apiKey
+            }
+          }
+        }
+      };
+
+      document.getElementById('config').textContent = JSON.stringify(mcpConfig, null, 2);
+
+      document.getElementById('copyKeyBtn').addEventListener('click', function() {
+        navigator.clipboard.writeText(apiKey);
+        this.textContent = 'Copied!';
+        setTimeout(() => this.textContent = 'Copy API Key', 2000);
+      });
+
+      document.getElementById('copyConfigBtn').addEventListener('click', function() {
+        navigator.clipboard.writeText(JSON.stringify(mcpConfig, null, 2));
+        this.textContent = 'Copied!';
+        setTimeout(() => this.textContent = 'Copy Config', 2000);
+      });
+    }
+  </script>
+</body>
+</html>`;
+}
+
 const legalStyles = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -783,6 +860,209 @@ export function renderErrorPage(message: string): string {
       Try Again
     </a>
   </div>
+</body>
+</html>`;
+}
+
+export function renderFilePickerPage(options: {
+  state: string;
+  oauthToken: string;
+  clientId: string;
+}): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Select Files - OpenBSP MCP</title>
+  <style>${baseStyles}
+    .file-list {
+      margin: 16px 0;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: #262626;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+    .file-item .name {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .file-item .remove {
+      color: #a3a3a3;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .file-item .remove:hover {
+      color: #ef4444;
+    }
+    .picker-btn {
+      background: #404040;
+      margin-bottom: 16px;
+    }
+    .skip-link {
+      display: block;
+      text-align: center;
+      margin-top: 16px;
+      color: #a3a3a3;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .skip-link:hover {
+      color: #e5e5e5;
+    }
+    .info {
+      background: #1e3a5f;
+      border: 1px solid #2563eb;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      color: #93c5fd;
+    }
+  </style>
+  <script type="module" src="https://unpkg.com/@anthropic-ai/claude-code@latest/dist/google-drive-picker.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Select Spreadsheets</h1>
+    <p class="subtitle">Choose which files to share with the AI assistant</p>
+
+    <div class="info">
+      You can skip this step if you only want to create new spreadsheets. The AI will be able to access any spreadsheets it creates.
+    </div>
+
+    <button class="btn picker-btn" id="openPicker">
+      📁 Browse Google Drive
+    </button>
+
+    <div id="selectedFiles">
+      <p style="color: #a3a3a3; font-size: 14px;">No files selected yet</p>
+    </div>
+
+    <button class="btn" id="continueBtn">Continue</button>
+
+    <div class="skip-link" id="skipBtn">Skip - I'll only create new spreadsheets</div>
+  </div>
+
+  <script type="module">
+    const state = '${options.state}';
+    const oauthToken = '${options.oauthToken}';
+    const clientId = '${options.clientId}';
+
+    let selectedFiles = [];
+
+    function renderFiles() {
+      const container = document.getElementById('selectedFiles');
+      if (selectedFiles.length === 0) {
+        container.innerHTML = '<p style="color: #a3a3a3; font-size: 14px;">No files selected yet</p>';
+        return;
+      }
+      container.innerHTML = '<div class="file-list">' +
+        selectedFiles.map((f, i) => \`
+          <div class="file-item">
+            <span class="name">\${f.name}</span>
+            <span class="remove" data-index="\${i}">&times;</span>
+          </div>
+        \`).join('') +
+        '</div>';
+
+      container.querySelectorAll('.remove').forEach(el => {
+        el.addEventListener('click', (e) => {
+          const idx = parseInt(e.target.dataset.index);
+          selectedFiles.splice(idx, 1);
+          renderFiles();
+        });
+      });
+    }
+
+    document.getElementById('openPicker').addEventListener('click', async () => {
+      try {
+        // Load Google Picker API
+        await new Promise((resolve, reject) => {
+          if (window.google?.picker) {
+            resolve();
+            return;
+          }
+          const script = document.createElement('script');
+          script.src = 'https://apis.google.com/js/api.js';
+          script.onload = () => {
+            gapi.load('picker', resolve);
+          };
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+
+        const picker = new google.picker.PickerBuilder()
+          .setOAuthToken(oauthToken)
+          .setDeveloperKey('')  // Not needed with OAuth token
+          .addView(new google.picker.DocsView()
+            .setIncludeFolders(false)
+            .setMimeTypes('application/vnd.google-apps.spreadsheet'))
+          .setCallback((data) => {
+            if (data.action === google.picker.Action.PICKED) {
+              data.docs.forEach(doc => {
+                if (!selectedFiles.find(f => f.id === doc.id)) {
+                  selectedFiles.push({
+                    id: doc.id,
+                    name: doc.name,
+                    mimeType: doc.mimeType
+                  });
+                }
+              });
+              renderFiles();
+            }
+          })
+          .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+          .build();
+
+        picker.setVisible(true);
+      } catch (err) {
+        console.error('Picker error:', err);
+        alert('Failed to open file picker. Please try again.');
+      }
+    });
+
+    async function submit(files) {
+      try {
+        const response = await fetch('/auth/files', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ state, files })
+        });
+
+        const result = await response.json();
+
+        if (result.redirect) {
+          window.location.href = result.redirect;
+        } else if (result.apiKey) {
+          // Redirect to success page with API key in fragment
+          window.location.href = '/auth/success#' + new URLSearchParams({
+            api_key: result.apiKey,
+            base_url: result.baseUrl
+          }).toString();
+        } else if (result.error) {
+          alert('Error: ' + result.error);
+        }
+      } catch (err) {
+        console.error('Submit error:', err);
+        alert('Failed to save. Please try again.');
+      }
+    }
+
+    document.getElementById('continueBtn').addEventListener('click', () => submit(selectedFiles));
+    document.getElementById('skipBtn').addEventListener('click', () => submit([]));
+
+    renderFiles();
+  </script>
 </body>
 </html>`;
 }

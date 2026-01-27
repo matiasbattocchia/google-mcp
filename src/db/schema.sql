@@ -17,5 +17,17 @@ CREATE TABLE IF NOT EXISTS oauth_states (
   scopes TEXT NOT NULL,  -- JSON array of requested scopes
   expiration TEXT NOT NULL DEFAULT 'never',
   callback TEXT,         -- Optional callback URL for programmatic flows
+  api_key TEXT,          -- Set after OAuth, used during file selection
   created_at INTEGER NOT NULL DEFAULT (unixepoch())
+);
+
+-- Authorized files (for drive.file scope)
+CREATE TABLE IF NOT EXISTS authorized_files (
+  api_key TEXT NOT NULL,
+  file_id TEXT NOT NULL,
+  file_name TEXT,
+  mime_type TEXT,
+  added_at INTEGER NOT NULL DEFAULT (unixepoch()),
+  PRIMARY KEY (api_key, file_id),
+  FOREIGN KEY (api_key) REFERENCES api_keys(api_key) ON DELETE CASCADE
 );

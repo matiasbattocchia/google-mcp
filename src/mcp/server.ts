@@ -6,26 +6,62 @@ import {
 import { z } from 'zod';
 import { calendarTools } from './tools/calendar.ts';
 import { sheetsTools } from './tools/sheets.ts';
+import { driveTools } from './tools/drive.ts';
+import { getAuthorizedFiles, hasAuthorizedFileType } from '../db/index.ts';
+
+// Context passed to tools
+export interface ToolContext {
+  accessToken: string;
+  db: D1Database;
+  apiKey: string;
+}
 
 // Combine all tools
 const allTools = {
   ...calendarTools,
   ...sheetsTools,
+  ...driveTools,
 };
 
 type ToolName = keyof typeof allTools;
 
 // Map products to their required scopes
-const productScopes: Record<string, string> = {
-  calendar: 'https://www.googleapis.com/auth/calendar',
-  sheets: 'https://www.googleapis.com/auth/spreadsheets',
+const productScopes: Record<string, string[]> = {
+  calendar: ['https://www.googleapis.com/auth/calendar'],
+  sheets: ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive.file'],
+  drive: ['https://www.googleapis.com/auth/drive.file'],
 };
 
-// Filter tools based on authorized scopes
-function getAuthorizedTools(scopes: string[]) {
+// Filter tools based on authorized scopes and authorized files
+async function getAuthorizedTools(scopes: string[], db: D1Database, apiKey: string) {
+  const hasDriveFile = scopes.includes('https://www.googleapis.com/auth/drive.file');
+  const hasSpreadsheets = scopes.includes('https://www.googleapis.com/auth/spreadsheets');
+
+  // Check if user has any authorized spreadsheets (for drive.file scope)
+  let hasAuthorizedSpreadsheets = false;
+  if (hasDriveFile) {
+    hasAuthorizedSpreadsheets = await hasAuthorizedFileType(
+      db, apiKey, 'application/vnd.google-apps.spreadsheet'
+    );
+  }
+
   return Object.entries(allTools).filter(([_, tool]) => {
-    const requiredScope = productScopes[tool.product];
-    return scopes.includes(requiredScope);
+    const allowedScopes = productScopes[tool.product];
+
+    // For sheets tools with drive.file scope, also need authorized spreadsheets
+    if (tool.product === 'sheets') {
+      if (hasSpreadsheets) return true;
+      if (hasDriveFile && hasAuthorizedSpreadsheets) return true;
+      return false;
+    }
+
+    // For drive tools, just need drive.file scope
+    if (tool.product === 'drive') {
+      return hasDriveFile;
+    }
+
+    // For other tools (calendar), check if any allowed scope is present
+    return allowedScopes.some(scope => scopes.includes(scope));
   });
 }
 
@@ -123,9 +159,12 @@ export interface McpHttpResponse {
 export async function handleMcpRequest(
   request: McpHttpRequest,
   accessToken: string,
-  scopes: string[]
+  scopes: string[],
+  db: D1Database,
+  apiKey: string
 ): Promise<McpHttpResponse> {
-  const authorizedTools = getAuthorizedTools(scopes);
+  const authorizedTools = await getAuthorizedTools(scopes, db, apiKey);
+  const context: ToolContext = { accessToken, db, apiKey };
 
   try {
     // Handle the request based on method
@@ -160,8 +199,9 @@ export async function handleMcpRequest(
       }
 
       // Check if user has access to this tool
-      const requiredScope = productScopes[tool.product];
-      if (!scopes.includes(requiredScope)) {
+      const allowedScopes = productScopes[tool.product];
+      const hasAccess = allowedScopes.some(scope => scopes.includes(scope));
+      if (!hasAccess) {
         return {
           jsonrpc: '2.0',
           id: request.id,
@@ -173,7 +213,10 @@ export async function handleMcpRequest(
       }
 
       const toolParams = tool.parameters.parse(params.arguments ?? {});
-      const result = await tool.execute(accessToken, toolParams as any);
+      // Drive tools get full context, other tools get just accessToken for backwards compatibility
+      const result = tool.product === 'drive'
+        ? await tool.execute(context, toolParams as any)
+        : await tool.execute(accessToken, toolParams as any);
 
       // structuredContent must be an object, wrap arrays
       const structuredContent = Array.isArray(result) ? { items: result } : result;

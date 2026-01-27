@@ -9,7 +9,7 @@ export const GOOGLE_SCOPES = {
   sheets: {
     label: 'Google Sheets',
     scopes: [
-      'https://www.googleapis.com/auth/spreadsheets',
+      'https://www.googleapis.com/auth/drive.file', // Only files opened/created by the app
     ],
   },
 } as const;

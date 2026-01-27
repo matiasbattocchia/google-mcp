@@ -6,8 +6,12 @@ import {
   deleteApiKey,
   updateTokens,
   createOAuthState,
+  getOAuthState,
+  updateOAuthStateApiKey,
   consumeOAuthState,
   expirationToTimestamp,
+  saveAuthorizedFiles,
+  getAuthorizedFiles,
 } from './db/index.ts';
 import {
   GOOGLE_SCOPES,
@@ -19,7 +23,7 @@ import {
   expandScopes,
 } from './auth/google.ts';
 import { handleMcpRequest, type McpHttpRequest } from './mcp/server.ts';
-import { renderHomePage, renderAuthPage, renderSuccessPage, renderErrorPage, renderPrivacyPolicy, renderTermsOfService } from './ui/pages.ts';
+import { renderHomePage, renderAuthPage, renderSuccessPage, renderSuccessPageFromFragment, renderErrorPage, renderPrivacyPolicy, renderTermsOfService, renderFilePickerPage } from './ui/pages.ts';
 
 type Bindings = Env & {
   GOOGLE_CLIENT_ID: string;
@@ -87,7 +91,8 @@ app.get('/auth/callback', async (c) => {
     return c.html(renderErrorPage('Missing code or state'), 400);
   }
 
-  const oauthState = await consumeOAuthState(c.env.DB, state);
+  // Get state without consuming (we need it for file selection step)
+  const oauthState = await getOAuthState(c.env.DB, state);
   if (!oauthState) {
     return c.html(renderErrorPage('Invalid or expired state'), 400);
   }
@@ -108,6 +113,18 @@ app.get('/auth/callback', async (c) => {
       expiresAt,
       c.env.ENCRYPTION_KEY
     );
+
+    // Check if sheets (drive.file) scope is included - need file selection
+    const hasDriveFileScope = oauthState.scopes.includes('https://www.googleapis.com/auth/drive.file');
+
+    if (hasDriveFileScope) {
+      // Store API key in state and redirect to file picker
+      await updateOAuthStateApiKey(c.env.DB, state, apiKey);
+      return c.redirect(`/auth/files?state=${state}`);
+    }
+
+    // No file selection needed - consume state and finish
+    await consumeOAuthState(c.env.DB, state);
 
     // If callback URL provided, redirect with API key in fragment
     if (oauthState.callback) {
@@ -132,6 +149,73 @@ app.get('/auth/callback', async (c) => {
 
     return c.html(renderErrorPage(`Token exchange failed: ${message}`), 500);
   }
+});
+
+// File picker page (for drive.file scope)
+app.get('/auth/files', async (c) => {
+  const state = c.req.query('state');
+  if (!state) {
+    return c.html(renderErrorPage('Missing state parameter'), 400);
+  }
+
+  const oauthState = await getOAuthState(c.env.DB, state);
+  if (!oauthState || !oauthState.apiKey) {
+    return c.html(renderErrorPage('Invalid or expired state'), 400);
+  }
+
+  // Get the API key record to access the OAuth token for the picker
+  const record = await getApiKeyRecord(c.env.DB, oauthState.apiKey, c.env.ENCRYPTION_KEY);
+  if (!record) {
+    return c.html(renderErrorPage('API key not found'), 400);
+  }
+
+  return c.html(renderFilePickerPage({
+    state,
+    oauthToken: record.google_access_token,
+    clientId: c.env.GOOGLE_CLIENT_ID,
+  }));
+});
+
+// File picker submission
+app.post('/auth/files', async (c) => {
+  let body: { state: string; files: { id: string; name: string; mimeType: string }[] };
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: 'Invalid JSON' }, 400);
+  }
+
+  const { state, files } = body;
+  if (!state) {
+    return c.json({ error: 'Missing state' }, 400);
+  }
+
+  const oauthState = await consumeOAuthState(c.env.DB, state);
+  if (!oauthState || !oauthState.apiKey) {
+    return c.json({ error: 'Invalid or expired state' }, 400);
+  }
+
+  // Save authorized files (if any selected)
+  if (files && files.length > 0) {
+    await saveAuthorizedFiles(c.env.DB, oauthState.apiKey, files);
+  }
+
+  // Return success with redirect info
+  if (oauthState.callback) {
+    const callbackUrl = new URL(oauthState.callback);
+    const fragment = new URLSearchParams({
+      api_key: oauthState.apiKey,
+      url: `${c.env.BASE_URL}/mcp`,
+    });
+    return c.json({ redirect: `${callbackUrl.toString()}#${fragment.toString()}` });
+  }
+
+  return c.json({ apiKey: oauthState.apiKey, baseUrl: c.env.BASE_URL });
+});
+
+// Success page (reads API key from fragment)
+app.get('/auth/success', (c) => {
+  return c.html(renderSuccessPageFromFragment());
 });
 
 // Revoke API key
@@ -216,14 +300,14 @@ app.post('/mcp', async (c) => {
   }
 
   // Handle the MCP request
-  let response = await handleMcpRequest(request, accessToken, scopes);
+  let response = await handleMcpRequest(request, accessToken, scopes, c.env.DB, apiKey);
 
   // If we got a Google API error that might be auth-related, try refreshing
   if (response.error?.message?.includes('401') || response.error?.message?.includes('403')) {
     const newToken = await refreshTokenIfNeeded();
     if (newToken) {
       accessToken = newToken;
-      response = await handleMcpRequest(request, accessToken, scopes);
+      response = await handleMcpRequest(request, accessToken, scopes, c.env.DB, apiKey);
     }
   }
 
