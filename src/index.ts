@@ -207,6 +207,10 @@ app.post('/auth/files', async (c) => {
       api_key: oauthState.apiKey,
       url: `${c.env.BASE_URL}/mcp`,
     });
+    // Include selected file names (comma-separated)
+    if (files && files.length > 0) {
+      fragment.set('files', files.map(f => f.name).join(','));
+    }
     return c.json({ redirect: `${callbackUrl.toString()}#${fragment.toString()}` });
   }
 

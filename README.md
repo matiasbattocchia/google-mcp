@@ -106,8 +106,10 @@ https://g.mcp.openbsp.dev/auth/google?products=calendar,sheets&callback=YOUR_CAL
 After authentication, the user is redirected to your callback with credentials in the URL fragment:
 
 ```
-YOUR_CALLBACK_URL#api_key=gmc_xxx&url=https://g.mcp.openbsp.dev/mcp
+YOUR_CALLBACK_URL#api_key=gmc_xxx&url=https://g.mcp.openbsp.dev/mcp&files=Budget.xlsx,Sales.xlsx
 ```
+
+The `files` parameter contains a comma-separated list of file names the user selected to share (only present when Sheets is authorized and files were selected).
 
 ## Available Tools
 
@@ -126,6 +128,7 @@ YOUR_CALLBACK_URL#api_key=gmc_xxx&url=https://g.mcp.openbsp.dev/mcp
 
 | Tool | Description |
 |------|-------------|
+| `get_authorized_files` | List files the user has authorized for access |
 | `get_spreadsheet` | Get spreadsheet metadata by ID |
 | `get_sheet_schema` | Get column names and inferred types |
 | `describe_sheet` | Get statistical summary of all columns |
@@ -135,8 +138,7 @@ YOUR_CALLBACK_URL#api_key=gmc_xxx&url=https://g.mcp.openbsp.dev/mcp
 | `append_rows` | Append rows to a table |
 | `create_spreadsheet` | Create a new spreadsheet |
 
-**Note**: Sheets tools require the spreadsheet ID, which you can find in the share URL:
-`https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit`
+**Privacy-focused access**: Sheets uses the `drive.file` scope, which only grants access to files the user explicitly selects during authentication (via Google Drive Picker) or files created by the app. Use `get_authorized_files` to discover which spreadsheets are available.
 
 ## Self-Hosting
 
