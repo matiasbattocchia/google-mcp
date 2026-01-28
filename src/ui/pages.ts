@@ -358,7 +358,7 @@ export function renderHomePage(): string {
     <div class="hero">
       <h1>OpenBSP MCP for Google Workspace</h1>
       <p class="subtitle">Let AI assistants access your Google Calendar and Sheets</p>
-      <a href="/auth" class="btn">Get Started</a>
+      <a href="/auth" class="btn">Get started</a>
     </div>
 
     <div class="section">
@@ -460,7 +460,7 @@ export function renderAuthPage(scopes: typeof GOOGLE_SCOPES): string {
       </div>
 
       <div class="expiration">
-        <label for="expiration">API Key Expiration</label>
+        <label for="expiration">API key expiration</label>
         <select name="expiration" id="expiration">
           <option value="never" selected>Never</option>
           <option value="1hour">1 hour</option>
@@ -543,14 +543,14 @@ export function renderSuccessPage(apiKey: string, baseUrl: string): string {
 
     <div class="api-key" id="apiKey">${apiKey}</div>
 
-    <button class="btn copy-btn" onclick="copyKey()">Copy API Key</button>
+    <button class="btn copy-btn" onclick="copyKey()">Copy API key</button>
 
     <div class="config-example">
-      <p style="color: #a3a3a3; margin-bottom: 8px; font-family: sans-serif;">MCP Client Config:</p>
+      <p style="color: #a3a3a3; margin-bottom: 8px; font-family: sans-serif;">MCP client config:</p>
       <pre id="config">${JSON.stringify(mcpConfig, null, 2)}</pre>
     </div>
 
-    <button class="btn copy-btn" onclick="copyConfig()">Copy Config</button>
+    <button class="btn copy-btn" onclick="copyConfig()">Copy config</button>
 
     <p style="color: #a3a3a3; margin-top: 24px; font-size: 13px;">
       Save this key securely. It won't be shown again.
@@ -561,13 +561,13 @@ export function renderSuccessPage(apiKey: string, baseUrl: string): string {
     function copyKey() {
       navigator.clipboard.writeText('${apiKey}');
       event.target.textContent = 'Copied!';
-      setTimeout(() => event.target.textContent = 'Copy API Key', 2000);
+      setTimeout(() => event.target.textContent = 'Copy API key', 2000);
     }
 
     function copyConfig() {
       navigator.clipboard.writeText(JSON.stringify(${JSON.stringify(mcpConfig)}, null, 2));
       event.target.textContent = 'Copied!';
-      setTimeout(() => event.target.textContent = 'Copy Config', 2000);
+      setTimeout(() => event.target.textContent = 'Copy config', 2000);
     }
   </script>
 </body>
@@ -597,14 +597,14 @@ export function renderSuccessPageFromFragment(): string {
 
     <div class="api-key" id="apiKey">Loading...</div>
 
-    <button class="btn copy-btn" id="copyKeyBtn">Copy API Key</button>
+    <button class="btn copy-btn" id="copyKeyBtn">Copy API key</button>
 
     <div class="config-example">
-      <p style="color: #a3a3a3; margin-bottom: 8px; font-family: sans-serif;">MCP Client Config:</p>
+      <p style="color: #a3a3a3; margin-bottom: 8px; font-family: sans-serif;">MCP client config:</p>
       <pre id="config">Loading...</pre>
     </div>
 
-    <button class="btn copy-btn" id="copyConfigBtn">Copy Config</button>
+    <button class="btn copy-btn" id="copyConfigBtn">Copy config</button>
 
     <p style="color: #a3a3a3; margin-top: 24px; font-size: 13px;">
       Save this key securely. It won't be shown again.
@@ -637,13 +637,13 @@ export function renderSuccessPageFromFragment(): string {
       document.getElementById('copyKeyBtn').addEventListener('click', function() {
         navigator.clipboard.writeText(apiKey);
         this.textContent = 'Copied!';
-        setTimeout(() => this.textContent = 'Copy API Key', 2000);
+        setTimeout(() => this.textContent = 'Copy API key', 2000);
       });
 
       document.getElementById('copyConfigBtn').addEventListener('click', function() {
         navigator.clipboard.writeText(JSON.stringify(mcpConfig, null, 2));
         this.textContent = 'Copied!';
-        setTimeout(() => this.textContent = 'Copy Config', 2000);
+        setTimeout(() => this.textContent = 'Copy config', 2000);
       });
     }
   </script>
@@ -857,7 +857,7 @@ export function renderErrorPage(message: string): string {
     <div class="error-message">${message}</div>
 
     <a href="/" class="btn" style="display: block; text-decoration: none; margin-top: 24px;">
-      Try Again
+      Try again
     </a>
   </div>
 </body>
@@ -908,49 +908,21 @@ export function renderFilePickerPage(options: {
       background: #404040;
       margin-bottom: 16px;
     }
-    .skip-link {
-      display: block;
-      text-align: center;
-      margin-top: 16px;
-      color: #a3a3a3;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    .skip-link:hover {
-      color: #e5e5e5;
-    }
-    .info {
-      background: #1e3a5f;
-      border: 1px solid #2563eb;
-      border-radius: 8px;
-      padding: 12px 16px;
-      margin-bottom: 24px;
-      font-size: 14px;
-      color: #93c5fd;
-    }
   </style>
   <script type="module" src="https://unpkg.com/@anthropic-ai/claude-code@latest/dist/google-drive-picker.js"></script>
 </head>
 <body>
   <div class="container">
     <h1>Select Spreadsheets</h1>
-    <p class="subtitle">Choose which files to share with the AI assistant</p>
-
-    <div class="info">
-      You can skip this step if you only want to create new spreadsheets. The AI will be able to access any spreadsheets it creates.
-    </div>
+    <p class="subtitle">The AI assistant can create new spreadsheets and will have access to any files it creates. You can also share existing spreadsheets by selecting them below.</p>
 
     <button class="btn picker-btn" id="openPicker">
-      📁 Browse Google Drive
+      Browse Google Drive
     </button>
 
-    <div id="selectedFiles">
-      <p style="color: #a3a3a3; font-size: 14px;">No files selected yet</p>
-    </div>
+    <div id="selectedFiles"></div>
 
     <button class="btn" id="continueBtn">Continue</button>
-
-    <div class="skip-link" id="skipBtn">Skip - I'll only create new spreadsheets</div>
   </div>
 
   <script type="module">
@@ -963,7 +935,7 @@ export function renderFilePickerPage(options: {
     function renderFiles() {
       const container = document.getElementById('selectedFiles');
       if (selectedFiles.length === 0) {
-        container.innerHTML = '<p style="color: #a3a3a3; font-size: 14px;">No files selected yet</p>';
+        container.innerHTML = '';
         return;
       }
       container.innerHTML = '<div class="file-list">' +
@@ -1059,7 +1031,6 @@ export function renderFilePickerPage(options: {
     }
 
     document.getElementById('continueBtn').addEventListener('click', () => submit(selectedFiles));
-    document.getElementById('skipBtn').addEventListener('click', () => submit([]));
 
     renderFiles();
   </script>
