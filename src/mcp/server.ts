@@ -41,9 +41,11 @@ async function getAuthorizedTools(scopes: string[], db: D1Database, apiKey: stri
     ? await hasAuthorizedFileType(db, apiKey, 'application/vnd.google-apps.spreadsheet')
     : false;
 
-  return Object.entries(allTools).filter(([_, tool]) => {
+  return Object.entries(allTools).filter(([name, tool]) => {
     // For sheets tools, need drive.file scope + authorized spreadsheets
+    // Exception: create_spreadsheet is always available (creates new files)
     if (tool.product === 'sheets') {
+      if (name === 'create_spreadsheet') return hasDriveFile;
       return hasDriveFile && hasAuthorizedSpreadsheets;
     }
 
