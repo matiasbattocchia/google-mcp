@@ -1,13 +1,14 @@
 import { z } from 'zod';
 import { calendar, EVENT_COLORS, type EventColor } from '../../lib/google.ts';
+import type { ToolContext } from '../server.ts';
 
 export const calendarTools = {
   list_calendars: {
     product: 'calendar' as const,
     description: 'List all calendars accessible to the user',
     parameters: z.object({}),
-    execute: async (accessToken: string) => {
-      const result = await calendar.listCalendars({ accessToken });
+    execute: async (context: ToolContext) => {
+      const result = await calendar.listCalendars({ accessToken: context.accessToken });
       return result.items.map((cal) => ({
         id: cal.id,
         name: cal.summary,
@@ -26,12 +27,12 @@ export const calendarTools = {
       timeMin: z.string().describe('Start of time range in ISO 8601 format'),
       timeMax: z.string().describe('End of time range in ISO 8601 format'),
     }),
-    execute: async (accessToken: string, params: {
+    execute: async (context: ToolContext, params: {
       calendarId: string;
       timeMin: string;
       timeMax: string;
     }) => {
-      const result = await calendar.freeBusy({ accessToken }, {
+      const result = await calendar.freeBusy({ accessToken: context.accessToken }, {
         timeMin: params.timeMin,
         timeMax: params.timeMax,
         calendarIds: [params.calendarId],
@@ -56,14 +57,14 @@ export const calendarTools = {
       maxResults: z.number().optional().default(50).describe('Maximum number of events to return'),
       query: z.string().optional().describe('Free text search query'),
     }),
-    execute: async (accessToken: string, params: {
+    execute: async (context: ToolContext, params: {
       calendarId: string;
       timeMin?: string;
       timeMax?: string;
       maxResults?: number;
       query?: string;
     }) => {
-      const result = await calendar.listEvents({ accessToken }, params.calendarId, {
+      const result = await calendar.listEvents({ accessToken: context.accessToken }, params.calendarId, {
         timeMin: params.timeMin,
         timeMax: params.timeMax,
         maxResults: params.maxResults,
@@ -100,7 +101,7 @@ export const calendarTools = {
       attendees: z.array(z.string()).optional().describe('List of attendee email addresses'),
       color: z.enum(['lavender', 'sage', 'grape', 'flamingo', 'banana', 'tangerine', 'peacock', 'graphite', 'blueberry', 'basil', 'tomato']).optional().describe('Event color'),
     }),
-    execute: async (accessToken: string, params: {
+    execute: async (context: ToolContext, params: {
       calendarId: string;
       summary: string;
       description?: string;
@@ -114,7 +115,7 @@ export const calendarTools = {
       // Detect all-day events (YYYY-MM-DD format) vs timed events
       const isAllDay = (val: string) => /^\d{4}-\d{2}-\d{2}$/.test(val);
       const event = await calendar.createEvent(
-        { accessToken },
+        { accessToken: context.accessToken },
         params.calendarId,
         {
           summary: params.summary,
@@ -158,7 +159,7 @@ export const calendarTools = {
       location: z.string().optional().describe('New event location'),
       color: z.enum(['lavender', 'sage', 'grape', 'flamingo', 'banana', 'tangerine', 'peacock', 'graphite', 'blueberry', 'basil', 'tomato']).optional().describe('Event color'),
     }),
-    execute: async (accessToken: string, params: {
+    execute: async (context: ToolContext, params: {
       calendarId: string;
       eventId: string;
       summary?: string;
@@ -188,7 +189,7 @@ export const calendarTools = {
       }
 
       const event = await calendar.updateEvent(
-        { accessToken },
+        { accessToken: context.accessToken },
         params.calendarId,
         params.eventId,
         updateData
@@ -210,8 +211,8 @@ export const calendarTools = {
       calendarId: z.string().default('primary').describe('Calendar ID'),
       eventId: z.string().describe('Event ID to delete'),
     }),
-    execute: async (accessToken: string, params: { calendarId: string; eventId: string }) => {
-      await calendar.deleteEvent({ accessToken }, params.calendarId, params.eventId);
+    execute: async (context: ToolContext, params: { calendarId: string; eventId: string }) => {
+      await calendar.deleteEvent({ accessToken: context.accessToken }, params.calendarId, params.eventId);
       return { success: true, message: `Event ${params.eventId} deleted` };
     },
   },
