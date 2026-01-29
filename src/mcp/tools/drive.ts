@@ -3,7 +3,7 @@ import { getAuthorizedFiles } from '../../db/index.ts';
 import type { ToolContext } from '../server.ts';
 
 export const driveTools = {
-  get_authorized_files: {
+  list_authorized_files: {
     product: 'drive' as const,
     description: 'List files the user has authorized for access. Use this to discover which spreadsheets are available before using sheets tools.',
     parameters: z.object({

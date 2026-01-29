@@ -128,7 +128,7 @@ The `files` parameter contains a comma-separated list of file names the user sel
 
 | Tool | Description |
 |------|-------------|
-| `get_authorized_files` | List files the user has authorized for access |
+| `list_authorized_files` | List files the user has authorized for access |
 | `get_spreadsheet` | Get spreadsheet metadata by ID |
 | `get_sheet_schema` | Get column names and inferred types |
 | `describe_sheet` | Get statistical summary of all columns |
@@ -138,7 +138,7 @@ The `files` parameter contains a comma-separated list of file names the user sel
 | `append_rows` | Append rows to a table |
 | `create_spreadsheet` | Create a new spreadsheet |
 
-**Privacy-focused access**: Sheets uses the `drive.file` scope, which only grants access to files the user explicitly selects during authentication (via Google Drive Picker) or files created by the app. Use `get_authorized_files` to discover which spreadsheets are available.
+**Privacy-focused access**: Sheets uses the `drive.file` scope, which only grants access to files the user explicitly selects during authentication (via Google Drive Picker) or files created by the app. Use `list_authorized_files` to discover which spreadsheets are available.
 
 ## Self-Hosting
 
