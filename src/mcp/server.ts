@@ -25,13 +25,6 @@ const allTools = {
 
 type ToolName = keyof typeof allTools;
 
-// Map products to their required scopes
-const productScopes: Record<string, string[]> = {
-  calendar: ['https://www.googleapis.com/auth/calendar'],
-  sheets: ['https://www.googleapis.com/auth/drive.file'],
-  drive: ['https://www.googleapis.com/auth/drive.file'],
-};
-
 // Filter tools based on authorized scopes and authorized files
 async function getAuthorizedTools(scopes: string[], db: D1Database, apiKey: string) {
   const hasDriveFile = scopes.includes('https://www.googleapis.com/auth/drive.file');
@@ -42,21 +35,16 @@ async function getAuthorizedTools(scopes: string[], db: D1Database, apiKey: stri
     : false;
 
   return Object.entries(allTools).filter(([name, tool]) => {
-    // For sheets tools, need drive.file scope + authorized spreadsheets
-    // Exception: create_spreadsheet is always available (creates new files)
-    if (tool.product === 'sheets') {
-      if (name === 'create_spreadsheet') return hasDriveFile;
-      return hasDriveFile && hasAuthorizedSpreadsheets;
+    // Check if user has all required scopes for this tool
+    const hasRequiredScopes = tool.scopes.every(scope => scopes.includes(scope));
+    if (!hasRequiredScopes) return false;
+
+    // For sheets tools (except create_spreadsheet), also require authorized spreadsheets
+    if (tool.product === 'sheets' && name !== 'create_spreadsheet') {
+      return hasAuthorizedSpreadsheets;
     }
 
-    // For drive tools, just need drive.file scope
-    if (tool.product === 'drive') {
-      return hasDriveFile;
-    }
-
-    // For other tools (calendar), check if any allowed scope is present
-    const allowedScopes = productScopes[tool.product];
-    return allowedScopes.some(scope => scopes.includes(scope));
+    return true;
   });
 }
 
@@ -194,15 +182,14 @@ export async function handleMcpRequest(
       }
 
       // Check if user has access to this tool
-      const allowedScopes = productScopes[tool.product];
-      const hasAccess = allowedScopes.some(scope => scopes.includes(scope));
+      const hasAccess = tool.scopes.every((scope: string) => scopes.includes(scope));
       if (!hasAccess) {
         return {
           jsonrpc: '2.0',
           id: request.id,
           error: {
             code: -32001,
-            message: `Tool "${toolName}" requires ${tool.product} authorization`,
+            message: `Tool "${toolName}" requires additional authorization`,
           },
         };
       }

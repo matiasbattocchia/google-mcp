@@ -5,6 +5,7 @@ import type { ToolContext } from '../server.ts';
 export const calendarTools = {
   list_calendars: {
     product: 'calendar' as const,
+    scopes: ['https://www.googleapis.com/auth/calendar.calendarlist.readonly'],
     description: 'List all calendars accessible to the user',
     parameters: z.object({}),
     execute: async (context: ToolContext) => {
@@ -21,6 +22,7 @@ export const calendarTools = {
 
   check_availability: {
     product: 'calendar' as const,
+    scopes: ['https://www.googleapis.com/auth/calendar.events'],
     description: 'Check calendar availability (busy/free times) without exposing event details',
     parameters: z.object({
       calendarId: z.string().default('primary').describe('Calendar ID to check'),
@@ -49,6 +51,7 @@ export const calendarTools = {
 
   list_events: {
     product: 'calendar' as const,
+    scopes: ['https://www.googleapis.com/auth/calendar.events'],
     description: 'List events from a calendar within a time range',
     parameters: z.object({
       calendarId: z.string().default('primary').describe('Calendar ID, defaults to primary calendar'),
@@ -89,6 +92,7 @@ export const calendarTools = {
 
   create_event: {
     product: 'calendar' as const,
+    scopes: ['https://www.googleapis.com/auth/calendar.events'],
     description: 'Create a new calendar event. Attendees receive email invitations automatically.',
     parameters: z.object({
       calendarId: z.string().default('primary').describe('Calendar ID, defaults to primary calendar'),
@@ -147,6 +151,7 @@ export const calendarTools = {
 
   update_event: {
     product: 'calendar' as const,
+    scopes: ['https://www.googleapis.com/auth/calendar.events'],
     description: 'Update an existing calendar event',
     parameters: z.object({
       calendarId: z.string().default('primary').describe('Calendar ID'),
@@ -206,6 +211,7 @@ export const calendarTools = {
 
   delete_event: {
     product: 'calendar' as const,
+    scopes: ['https://www.googleapis.com/auth/calendar.events'],
     description: 'Delete a calendar event',
     parameters: z.object({
       calendarId: z.string().default('primary').describe('Calendar ID'),

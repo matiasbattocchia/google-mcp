@@ -3,13 +3,14 @@ export const GOOGLE_SCOPES = {
   calendar: {
     label: 'Google Calendar',
     scopes: [
-      'https://www.googleapis.com/auth/calendar',
+      'https://www.googleapis.com/auth/calendar.events',
+      'https://www.googleapis.com/auth/calendar.calendarlist.readonly',
     ],
   },
   sheets: {
     label: 'Google Sheets',
     scopes: [
-      'https://www.googleapis.com/auth/drive.file', // Only files opened/created by the app
+      'https://www.googleapis.com/auth/drive.file',
     ],
   },
 } as const;

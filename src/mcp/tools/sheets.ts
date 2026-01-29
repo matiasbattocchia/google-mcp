@@ -120,6 +120,7 @@ function inferType(values: unknown[]): string {
 export const sheetsTools = {
   get_sheet_schema: {
     product: 'sheets' as const,
+    scopes: ['https://www.googleapis.com/auth/drive.file'],
     description: 'Get column names and inferred types from a sheet (useful before appending data)',
     parameters: z.object({
       spreadsheetId: z.string().describe('The spreadsheet ID'),
@@ -164,6 +165,7 @@ export const sheetsTools = {
 
   describe_sheet: {
     product: 'sheets' as const,
+    scopes: ['https://www.googleapis.com/auth/drive.file'],
     description: 'Get a statistical summary of all columns in a sheet (like pandas describe). Shows types, unique values, top values for categorical columns, and min/max for numeric columns.',
     parameters: z.object({
       spreadsheetId: z.string().describe('The spreadsheet ID'),
@@ -246,6 +248,7 @@ export const sheetsTools = {
 
   search_rows: {
     product: 'sheets' as const,
+    scopes: ['https://www.googleapis.com/auth/drive.file'],
     description: 'Search for rows matching filter criteria. All string comparisons are case-insensitive and accent-normalized.',
     parameters: z.object({
       spreadsheetId: z.string().describe('The spreadsheet ID'),
@@ -321,6 +324,7 @@ export const sheetsTools = {
 
   get_spreadsheet: {
     product: 'sheets' as const,
+    scopes: ['https://www.googleapis.com/auth/drive.file'],
     description: 'Get spreadsheet metadata including sheet names',
     parameters: z.object({
       spreadsheetId: z.string().describe('The spreadsheet ID'),
@@ -341,6 +345,7 @@ export const sheetsTools = {
 
   read_sheet: {
     product: 'sheets' as const,
+    scopes: ['https://www.googleapis.com/auth/drive.file'],
     description: 'Read data from a spreadsheet range',
     parameters: z.object({
       spreadsheetId: z.string().describe('The spreadsheet ID'),
@@ -359,6 +364,7 @@ export const sheetsTools = {
 
   write_sheet: {
     product: 'sheets' as const,
+    scopes: ['https://www.googleapis.com/auth/drive.file'],
     description: 'Write data to a spreadsheet range (overwrites existing data)',
     parameters: z.object({
       spreadsheetId: z.string().describe('The spreadsheet ID'),
@@ -391,6 +397,7 @@ export const sheetsTools = {
 
   append_rows: {
     product: 'sheets' as const,
+    scopes: ['https://www.googleapis.com/auth/drive.file'],
     description: 'Append rows to the end of a spreadsheet table',
     parameters: z.object({
       spreadsheetId: z.string().describe('The spreadsheet ID'),
@@ -423,6 +430,7 @@ export const sheetsTools = {
 
   create_spreadsheet: {
     product: 'sheets' as const,
+    scopes: ['https://www.googleapis.com/auth/drive.file'],
     description: 'Create a new spreadsheet',
     parameters: z.object({
       title: z.string().describe('Title for the new spreadsheet'),

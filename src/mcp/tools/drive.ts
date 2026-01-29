@@ -5,6 +5,7 @@ import type { ToolContext } from '../server.ts';
 export const driveTools = {
   list_authorized_files: {
     product: 'drive' as const,
+    scopes: ['https://www.googleapis.com/auth/drive.file'],
     description: 'List files the user has authorized for access. Use this to discover which spreadsheets are available before using sheets tools.',
     parameters: z.object({
       mimeType: z.string().optional().describe('Filter by MIME type (e.g., "application/vnd.google-apps.spreadsheet")'),
