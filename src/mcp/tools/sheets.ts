@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import { sheets } from '../../lib/google.ts';
+import { saveAuthorizedFiles } from '../../db/index.ts';
+import type { ToolContext } from '../server.ts';
 
 // Normalize string: lowercase + remove accents
 function normalize(value: unknown): string {
@@ -124,14 +126,14 @@ export const sheetsTools = {
       sheet: z.string().default('Sheet1').describe('Sheet name'),
       sampleRows: z.number().optional().default(5).describe('Number of data rows to sample for type inference'),
     }),
-    execute: async (accessToken: string, params: {
+    execute: async (context: ToolContext, params: {
       spreadsheetId: string;
       sheet: string;
       sampleRows: number;
     }) => {
       // Read header + sample rows
       const range = `${params.sheet}!1:${params.sampleRows + 1}`;
-      const result = await sheets.readRange({ accessToken }, params.spreadsheetId, range);
+      const result = await sheets.readRange({ accessToken: context.accessToken }, params.spreadsheetId, range);
 
       const rows = result.values ?? [];
       if (rows.length === 0) {
@@ -169,14 +171,14 @@ export const sheetsTools = {
       maxRows: z.number().optional().default(1000).describe('Maximum rows to analyze'),
       topValuesLimit: z.number().optional().default(5).describe('Number of top values to show per column'),
     }),
-    execute: async (accessToken: string, params: {
+    execute: async (context: ToolContext, params: {
       spreadsheetId: string;
       sheet: string;
       maxRows: number;
       topValuesLimit: number;
     }) => {
       const range = `${params.sheet}!1:${params.maxRows + 1}`;
-      const result = await sheets.readRange({ accessToken }, params.spreadsheetId, range);
+      const result = await sheets.readRange({ accessToken: context.accessToken }, params.spreadsheetId, range);
 
       const rows = result.values ?? [];
       if (rows.length === 0) {
@@ -257,7 +259,7 @@ export const sheetsTools = {
       maxRows: z.number().optional().default(1000).describe('Maximum rows to scan'),
       maxResults: z.number().optional().default(100).describe('Maximum matching rows to return'),
     }),
-    execute: async (accessToken: string, params: {
+    execute: async (context: ToolContext, params: {
       spreadsheetId: string;
       sheet: string;
       filters: Filter[];
@@ -266,7 +268,7 @@ export const sheetsTools = {
     }) => {
       // Read header + data rows
       const range = `${params.sheet}!1:${params.maxRows + 1}`;
-      const result = await sheets.readRange({ accessToken }, params.spreadsheetId, range);
+      const result = await sheets.readRange({ accessToken: context.accessToken }, params.spreadsheetId, range);
 
       const rows = result.values ?? [];
       if (rows.length === 0) {
@@ -323,8 +325,8 @@ export const sheetsTools = {
     parameters: z.object({
       spreadsheetId: z.string().describe('The spreadsheet ID'),
     }),
-    execute: async (accessToken: string, params: { spreadsheetId: string }) => {
-      const spreadsheet = await sheets.getSpreadsheet({ accessToken }, params.spreadsheetId);
+    execute: async (context: ToolContext, params: { spreadsheetId: string }) => {
+      const spreadsheet = await sheets.getSpreadsheet({ accessToken: context.accessToken }, params.spreadsheetId);
       return {
         id: spreadsheet.spreadsheetId,
         title: spreadsheet.properties.title,
@@ -344,8 +346,8 @@ export const sheetsTools = {
       spreadsheetId: z.string().describe('The spreadsheet ID'),
       range: z.string().describe('A1 notation range (e.g., "Sheet1!A1:D10" or "A1:D10")'),
     }),
-    execute: async (accessToken: string, params: { spreadsheetId: string; range: string }) => {
-      const result = await sheets.readRange({ accessToken }, params.spreadsheetId, params.range);
+    execute: async (context: ToolContext, params: { spreadsheetId: string; range: string }) => {
+      const result = await sheets.readRange({ accessToken: context.accessToken }, params.spreadsheetId, params.range);
       return {
         range: result.range,
         values: result.values ?? [],
@@ -364,14 +366,14 @@ export const sheetsTools = {
       values: z.array(z.array(z.unknown())).describe('2D array of values to write'),
       raw: z.boolean().optional().default(false).describe('If true, values are stored as-is without parsing'),
     }),
-    execute: async (accessToken: string, params: {
+    execute: async (context: ToolContext, params: {
       spreadsheetId: string;
       range: string;
       values: unknown[][];
       raw?: boolean;
     }) => {
       const result = await sheets.writeRange(
-        { accessToken },
+        { accessToken: context.accessToken },
         params.spreadsheetId,
         params.range,
         params.values,
@@ -396,14 +398,14 @@ export const sheetsTools = {
       values: z.array(z.array(z.unknown())).describe('2D array of rows to append'),
       raw: z.boolean().optional().default(false).describe('If true, values are stored as-is'),
     }),
-    execute: async (accessToken: string, params: {
+    execute: async (context: ToolContext, params: {
       spreadsheetId: string;
       range: string;
       values: unknown[][];
       raw?: boolean;
     }) => {
       const result = await sheets.appendRows(
-        { accessToken },
+        { accessToken: context.accessToken },
         params.spreadsheetId,
         params.range,
         params.values,
@@ -425,8 +427,16 @@ export const sheetsTools = {
     parameters: z.object({
       title: z.string().describe('Title for the new spreadsheet'),
     }),
-    execute: async (accessToken: string, params: { title: string }) => {
-      const spreadsheet = await sheets.createSpreadsheet({ accessToken }, params.title);
+    execute: async (context: ToolContext, params: { title: string }) => {
+      const spreadsheet = await sheets.createSpreadsheet({ accessToken: context.accessToken }, params.title);
+
+      // Save to authorized files so it appears in get_authorized_files
+      await saveAuthorizedFiles(context.db, context.apiKey, [{
+        id: spreadsheet.spreadsheetId,
+        name: spreadsheet.properties.title,
+        mimeType: 'application/vnd.google-apps.spreadsheet',
+      }]);
+
       return {
         id: spreadsheet.spreadsheetId,
         title: spreadsheet.properties.title,

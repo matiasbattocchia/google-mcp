@@ -213,8 +213,8 @@ export async function handleMcpRequest(
       }
 
       const toolParams = tool.parameters.parse(params.arguments ?? {});
-      // Drive tools get full context, other tools get just accessToken for backwards compatibility
-      const result = tool.product === 'drive'
+      // Drive and sheets tools get full context, other tools get just accessToken for backwards compatibility
+      const result = tool.product === 'drive' || tool.product === 'sheets'
         ? await tool.execute(context, toolParams as any)
         : await tool.execute(accessToken, toolParams as any);
 
