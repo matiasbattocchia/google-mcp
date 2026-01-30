@@ -22,6 +22,7 @@ import {
   revokeToken,
   expandScopes,
 } from './auth/google.ts';
+import { getUserEmail } from './lib/google.ts';
 import { handleMcpRequest, type McpHttpRequest } from './mcp/server.ts';
 import { renderHomePage, renderAuthPage, renderSuccessPage, renderSuccessPageFromFragment, renderErrorPage, renderPrivacyPolicy, renderTermsOfService, renderFilePickerPage } from './ui/pages.ts';
 
@@ -128,10 +129,12 @@ app.get('/auth/callback', async (c) => {
 
     // If callback URL provided, redirect with API key in fragment
     if (oauthState.callback) {
+      const email = await getUserEmail(tokens.access_token);
       const callbackUrl = new URL(oauthState.callback);
       const fragment = new URLSearchParams({
         api_key: apiKey,
         url: `${c.env.BASE_URL}/mcp`,
+        email,
       });
       return c.redirect(`${callbackUrl.toString()}#${fragment.toString()}`);
     }
@@ -202,10 +205,15 @@ app.post('/auth/files', async (c) => {
 
   // Return success with redirect info
   if (oauthState.callback) {
+    // Get access token to fetch user email
+    const record = await getApiKeyRecord(c.env.DB, oauthState.apiKey, c.env.ENCRYPTION_KEY);
+    const email = record ? await getUserEmail(record.google_access_token) : '';
+
     const callbackUrl = new URL(oauthState.callback);
     const fragment = new URLSearchParams({
       api_key: oauthState.apiKey,
       url: `${c.env.BASE_URL}/mcp`,
+      email,
     });
     // Include selected file names (comma-separated)
     if (files && files.length > 0) {

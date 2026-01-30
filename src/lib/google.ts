@@ -209,6 +209,18 @@ export const sheets = {
   },
 };
 
+// User Info API
+export async function getUserEmail(accessToken: string): Promise<string> {
+  const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!response.ok) {
+    throw new Error('Failed to fetch user info');
+  }
+  const data = await response.json() as { email: string };
+  return data.email;
+}
+
 // Types
 export interface CalendarListEntry {
   id: string;

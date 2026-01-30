@@ -106,10 +106,15 @@ https://g.mcp.openbsp.dev/auth/google?products=calendar,sheets&callback=YOUR_CAL
 After authentication, the user is redirected to your callback with credentials in the URL fragment:
 
 ```
-YOUR_CALLBACK_URL#api_key=gmc_xxx&url=https://g.mcp.openbsp.dev/mcp&files=Budget.xlsx,Sales.xlsx
+YOUR_CALLBACK_URL#api_key=gmc_xxx&url=https://g.mcp.openbsp.dev/mcp&email=user@gmail.com&files=Budget.xlsx,Sales.xlsx
 ```
 
-The `files` parameter contains a comma-separated list of file names the user selected to share (only present when Sheets is authorized and files were selected).
+| Parameter | Description |
+|-----------|-------------|
+| `api_key` | The generated API key |
+| `url` | The MCP endpoint URL |
+| `email` | The Google account email that authorized access |
+| `files` | Comma-separated file names (only when Sheets authorized and files selected) |
 
 ## Available Tools
 
