@@ -106,6 +106,8 @@ export async function revokeToken(token: string): Promise<void> {
 
 export function expandScopes(products: GoogleProduct[]): string[] {
   const scopes = new Set<string>();
+  // Always include email scope for user identification
+  scopes.add('email');
   for (const product of products) {
     for (const scope of GOOGLE_SCOPES[product].scopes) {
       scopes.add(scope);
