@@ -115,6 +115,8 @@ The `files` parameter contains a comma-separated list of file names the user sel
 
 ### Calendar
 
+**Scopes requested:** `calendar.events`, `calendar.calendarlist.readonly`
+
 | Tool | Description |
 |------|-------------|
 | `list_calendars` | List all your calendars |
@@ -125,6 +127,8 @@ The `files` parameter contains a comma-separated list of file names the user sel
 | `delete_event` | Delete an event |
 
 ### Sheets
+
+**Scope requested:** `drive.file`
 
 | Tool | Description |
 |------|-------------|
@@ -138,7 +142,7 @@ The `files` parameter contains a comma-separated list of file names the user sel
 | `append_rows` | Append rows to a table |
 | `create_spreadsheet` | Create a new spreadsheet |
 
-**Privacy-focused access**: Sheets uses the `drive.file` scope, which only grants access to files the user explicitly selects during authentication (via Google Drive Picker) or files created by the app. Use `list_authorized_files` to discover which spreadsheets are available.
+The `drive.file` scope only grants access to files the user explicitly selects during authentication (via Google Drive Picker) or files created by the app. Use `list_authorized_files` to discover which spreadsheets are available.
 
 ## Self-Hosting
 
