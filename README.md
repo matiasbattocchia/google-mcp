@@ -115,7 +115,9 @@ The `files` parameter contains a comma-separated list of file names the user sel
 
 ### Calendar
 
-**Scopes requested:** `calendar.events`, `calendar.calendarlist.readonly`
+**Scopes requested:**
+- `calendar.events` - read and write events
+- `calendar.calendarlist.readonly` - list your calendars (read-only)
 
 | Tool | Description |
 |------|-------------|
@@ -128,7 +130,8 @@ The `files` parameter contains a comma-separated list of file names the user sel
 
 ### Sheets
 
-**Scope requested:** `drive.file`
+**Scope requested:**
+- `drive.file` - access only files you select or files created by the app
 
 | Tool | Description |
 |------|-------------|
