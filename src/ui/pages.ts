@@ -724,7 +724,7 @@ export function renderPrivacyPolicy(): string {
     <h1>Privacy Policy</h1>
     <p class="updated">Last updated: February 2026</p>
 
-    <h2>What we collect</h2>
+    <h2 id="collect">What we collect</h2>
     <p>When you use OpenBSP MCP, we store:</p>
     <ul>
       <li><strong>API Key</strong> - A randomly generated 256-bit key to authenticate your MCP client</li>
@@ -733,7 +733,7 @@ export function renderPrivacyPolicy(): string {
       <li><strong>Authorized Files</strong> - IDs and names of Google Drive files you selected to share</li>
     </ul>
 
-    <h2>What we don't collect</h2>
+    <h2 id="not-collect">What we don't collect</h2>
     <ul>
       <li>Your Google password</li>
       <li>Your email address or personal information</li>
@@ -751,7 +751,7 @@ export function renderPrivacyPolicy(): string {
       <li><strong>No logging of sensitive data</strong> - We do not log API request contents, OAuth tokens, or any data passing through to Google APIs.</li>
     </ul>
 
-    <h2>How your data flows</h2>
+    <h2 id="data-flow">How your data flows</h2>
     <p>When your AI assistant makes a request:</p>
     <ul>
       <li>Your MCP client sends the request to our server over HTTPS with your API key</li>
@@ -761,7 +761,7 @@ export function renderPrivacyPolicy(): string {
       <li>No request or response data is logged or stored</li>
     </ul>
 
-    <h2>Data retention</h2>
+    <h2 id="retention">Data retention</h2>
     <ul>
       <li><strong>API keys and tokens</strong> - Stored until you revoke them or they expire</li>
       <li><strong>OAuth states</strong> - Temporary data automatically deleted after 10 minutes</li>
@@ -776,7 +776,7 @@ export function renderPrivacyPolicy(): string {
     </ul>
     <p>Both methods immediately delete your API key, encrypted tokens, and authorized file list from our database.</p>
 
-    <h2>Third parties</h2>
+    <h2 id="third-parties">Third parties</h2>
     <p>We use:</p>
     <ul>
       <li><strong>Cloudflare</strong> - Hosting, infrastructure, and edge security</li>
@@ -784,10 +784,10 @@ export function renderPrivacyPolicy(): string {
     </ul>
     <p>We do not sell or share your data with any other third parties.</p>
 
-    <h2>Open source</h2>
+    <h2 id="open-source">Open source</h2>
     <p>This project is fully open source. You can review all code, including our security implementations, at <a href="https://github.com/matiasbattocchia/google-mcp">github.com/matiasbattocchia/google-mcp</a>.</p>
 
-    <h2>Contact</h2>
+    <h2 id="contact">Contact</h2>
     <p>For questions about this policy, open an issue on <a href="https://github.com/matiasbattocchia/google-mcp">GitHub</a>.</p>
 
     <a href="/" class="back">&larr; Back to home</a>
@@ -810,13 +810,13 @@ export function renderTermsOfService(): string {
     <h1>Terms of Service</h1>
     <p class="updated">Last updated: January 2026</p>
 
-    <h2>Service description</h2>
+    <h2 id="description">Service description</h2>
     <p>OpenBSP MCP is a free, open-source service that connects MCP-compatible AI clients to Google Calendar and Google Sheets APIs.</p>
 
-    <h2>Acceptance</h2>
+    <h2 id="acceptance">Acceptance</h2>
     <p>By using this service, you agree to these terms. If you don't agree, please don't use the service.</p>
 
-    <h2>Your responsibilities</h2>
+    <h2 id="responsibilities">Your responsibilities</h2>
     <ul>
       <li>Keep your API key secure and don't share it publicly</li>
       <li>Use the service in compliance with Google's Terms of Service</li>
@@ -824,7 +824,7 @@ export function renderTermsOfService(): string {
       <li>Don't attempt to abuse, overload, or exploit the service</li>
     </ul>
 
-    <h2>Service availability</h2>
+    <h2 id="availability">Service availability</h2>
     <p>This service is provided "as is" without guarantees. We may:</p>
     <ul>
       <li>Modify or discontinue the service at any time</li>
@@ -832,17 +832,17 @@ export function renderTermsOfService(): string {
       <li>Revoke API keys that violate these terms</li>
     </ul>
 
-    <h2>Limitations</h2>
+    <h2 id="limitations">Limitations</h2>
     <ul>
       <li>We are not responsible for any data loss or damages</li>
       <li>We don't guarantee uptime or availability</li>
       <li>We are not affiliated with Google or Anthropic</li>
     </ul>
 
-    <h2>Open source</h2>
+    <h2 id="open-source">Open source</h2>
     <p>This project is open source under The Unlicense (public domain). You can review the code, self-host your own instance, or contribute improvements on <a href="https://github.com/matiasbattocchia/google-mcp">GitHub</a>.</p>
 
-    <h2>Changes</h2>
+    <h2 id="changes">Changes</h2>
     <p>We may update these terms. Continued use of the service constitutes acceptance of any changes.</p>
 
     <a href="/" class="back">&larr; Back to home</a>
