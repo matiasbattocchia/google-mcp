@@ -1,7 +1,18 @@
 import { z } from 'zod';
 import { sheets } from '../../lib/google.ts';
-import { saveAuthorizedFiles } from '../../db/index.ts';
+import { saveAuthorizedFiles, isFileAuthorized } from '../../db/index.ts';
 import type { ToolContext } from '../server.ts';
+
+// Check if file is authorized, throw helpful error if not
+async function requireAuthorizedFile(context: ToolContext, spreadsheetId: string): Promise<void> {
+  const authorized = await isFileAuthorized(context.db, context.apiKey, spreadsheetId);
+  if (!authorized) {
+    throw new Error(
+      `Spreadsheet not authorized. The file "${spreadsheetId}" was not selected during authentication. ` +
+      `Use list_authorized_files to see available spreadsheets, or re-authenticate to select this file.`
+    );
+  }
+}
 
 // Normalize string: lowercase + remove accents
 function normalize(value: unknown): string {
@@ -132,6 +143,7 @@ export const sheetsTools = {
       sheet: string;
       sampleRows: number;
     }) => {
+      await requireAuthorizedFile(context, params.spreadsheetId);
       // Read header + sample rows
       const range = `${params.sheet}!1:${params.sampleRows + 1}`;
       const result = await sheets.readRange({ accessToken: context.accessToken }, params.spreadsheetId, range);
@@ -179,6 +191,7 @@ export const sheetsTools = {
       maxRows: number;
       topValuesLimit: number;
     }) => {
+      await requireAuthorizedFile(context, params.spreadsheetId);
       const range = `${params.sheet}!1:${params.maxRows + 1}`;
       const result = await sheets.readRange({ accessToken: context.accessToken }, params.spreadsheetId, range);
 
@@ -269,6 +282,7 @@ export const sheetsTools = {
       maxRows: number;
       maxResults: number;
     }) => {
+      await requireAuthorizedFile(context, params.spreadsheetId);
       // Read header + data rows
       const range = `${params.sheet}!1:${params.maxRows + 1}`;
       const result = await sheets.readRange({ accessToken: context.accessToken }, params.spreadsheetId, range);
@@ -330,6 +344,7 @@ export const sheetsTools = {
       spreadsheetId: z.string().describe('The spreadsheet ID'),
     }),
     execute: async (context: ToolContext, params: { spreadsheetId: string }) => {
+      await requireAuthorizedFile(context, params.spreadsheetId);
       const spreadsheet = await sheets.getSpreadsheet({ accessToken: context.accessToken }, params.spreadsheetId);
       return {
         id: spreadsheet.spreadsheetId,
@@ -352,6 +367,7 @@ export const sheetsTools = {
       range: z.string().describe('A1 notation range (e.g., "Sheet1!A1:D10" or "A1:D10")'),
     }),
     execute: async (context: ToolContext, params: { spreadsheetId: string; range: string }) => {
+      await requireAuthorizedFile(context, params.spreadsheetId);
       const result = await sheets.readRange({ accessToken: context.accessToken }, params.spreadsheetId, params.range);
       return {
         range: result.range,
@@ -378,6 +394,7 @@ export const sheetsTools = {
       values: unknown[][];
       raw?: boolean;
     }) => {
+      await requireAuthorizedFile(context, params.spreadsheetId);
       const result = await sheets.writeRange(
         { accessToken: context.accessToken },
         params.spreadsheetId,
@@ -411,6 +428,7 @@ export const sheetsTools = {
       values: unknown[][];
       raw?: boolean;
     }) => {
+      await requireAuthorizedFile(context, params.spreadsheetId);
       const result = await sheets.appendRows(
         { accessToken: context.accessToken },
         params.spreadsheetId,
