@@ -741,7 +741,7 @@ export function renderPrivacyPolicy(): string {
       <li>Usage logs or analytics</li>
     </ul>
 
-    <h2>Data protection</h2>
+    <h2 id="data-protection">Data protection</h2>
     <p>We implement multiple layers of security to protect your data:</p>
     <ul>
       <li><strong>Encryption in transit</strong> - All connections use HTTPS/TLS. Data is encrypted between your client, our servers, and Google's APIs.</li>
