@@ -722,16 +722,16 @@ export function renderPrivacyPolicy(): string {
 <body>
   <div class="container">
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: January 2026</p>
+    <p class="updated">Last updated: February 2026</p>
 
     <h2>What we collect</h2>
     <p>When you use OpenBSP MCP, we store:</p>
     <ul>
       <li><strong>API Key</strong> - A randomly generated 256-bit key to authenticate your MCP client</li>
-      <li><strong>OAuth Tokens</strong> - Access and refresh tokens from Google, encrypted at rest using AES-256-GCM</li>
+      <li><strong>OAuth Tokens</strong> - Access and refresh tokens from Google to make API calls on your behalf</li>
       <li><strong>Scopes</strong> - Which Google products you authorized (Calendar, Sheets)</li>
+      <li><strong>Authorized Files</strong> - IDs and names of Google Drive files you selected to share</li>
     </ul>
-    <p>OAuth tokens are encrypted with a key stored separately from the database. A database breach alone cannot expose your Google credentials.</p>
 
     <h2>What we don't collect</h2>
     <ul>
@@ -741,19 +741,31 @@ export function renderPrivacyPolicy(): string {
       <li>Usage logs or analytics</li>
     </ul>
 
+    <h2>Data protection</h2>
+    <p>We implement multiple layers of security to protect your data:</p>
+    <ul>
+      <li><strong>Encryption in transit</strong> - All connections use HTTPS/TLS. Data is encrypted between your client, our servers, and Google's APIs.</li>
+      <li><strong>Encryption at rest</strong> - OAuth tokens are encrypted using AES-256-GCM before storage. The encryption key is stored separately from the database in secure environment variables, so a database breach alone cannot expose your Google credentials.</li>
+      <li><strong>Minimal data storage</strong> - We only store what's necessary to authenticate API requests. Your actual calendar events and spreadsheet contents are never stored.</li>
+      <li><strong>Secure infrastructure</strong> - Hosted on Cloudflare Workers with built-in DDoS protection, automatic security updates, and isolated execution environments.</li>
+      <li><strong>No logging of sensitive data</strong> - We do not log API request contents, OAuth tokens, or any data passing through to Google APIs.</li>
+    </ul>
+
     <h2>How your data flows</h2>
     <p>When your AI assistant makes a request:</p>
     <ul>
-      <li>Your MCP client sends the request to our server with your API key</li>
-      <li>We use your stored OAuth token to call Google's API</li>
+      <li>Your MCP client sends the request to our server over HTTPS with your API key</li>
+      <li>We decrypt your stored OAuth token in memory</li>
+      <li>We call Google's API over HTTPS on your behalf</li>
       <li>Google's response passes through our server to your client</li>
-      <li>We do not log, store, or inspect the content of these requests</li>
+      <li>No request or response data is logged or stored</li>
     </ul>
 
     <h2>Data retention</h2>
     <ul>
       <li><strong>API keys and tokens</strong> - Stored until you revoke them or they expire</li>
-      <li><strong>OAuth states</strong> - Temporary data deleted after 10 minutes</li>
+      <li><strong>OAuth states</strong> - Temporary data automatically deleted after 10 minutes</li>
+      <li><strong>Authorized files</strong> - Stored until you delete your API key</li>
     </ul>
 
     <h2 id="delete">How to delete your data</h2>
@@ -762,14 +774,18 @@ export function renderPrivacyPolicy(): string {
       <li>Delete your API key: <code>curl -X DELETE https://g.mcp.openbsp.dev/key/YOUR_API_KEY</code></li>
       <li>Revoke from Google: <a href="https://myaccount.google.com/permissions">Google Account Permissions</a></li>
     </ul>
+    <p>Both methods immediately delete your API key, encrypted tokens, and authorized file list from our database.</p>
 
     <h2>Third parties</h2>
     <p>We use:</p>
     <ul>
-      <li><strong>Cloudflare</strong> - Hosting and infrastructure</li>
+      <li><strong>Cloudflare</strong> - Hosting, infrastructure, and edge security</li>
       <li><strong>Google APIs</strong> - Calendar and Sheets access</li>
     </ul>
     <p>We do not sell or share your data with any other third parties.</p>
+
+    <h2>Open source</h2>
+    <p>This project is fully open source. You can review all code, including our security implementations, at <a href="https://github.com/matiasbattocchia/google-mcp">github.com/matiasbattocchia/google-mcp</a>.</p>
 
     <h2>Contact</h2>
     <p>For questions about this policy, open an issue on <a href="https://github.com/matiasbattocchia/google-mcp">GitHub</a>.</p>
