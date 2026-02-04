@@ -339,7 +339,7 @@ export const sheetsTools = {
   get_spreadsheet: {
     product: 'sheets' as const,
     scopes: ['https://www.googleapis.com/auth/drive.file'],
-    description: 'Get spreadsheet metadata including sheet names',
+    description: 'Get spreadsheet metadata including sheet names and tables. Only works with file IDs from this integration - use list_authorized_files first.',
     parameters: z.object({
       spreadsheetId: z.string().describe('The spreadsheet ID'),
     }),
@@ -353,6 +353,15 @@ export const sheetsTools = {
           id: s.properties.sheetId,
           title: s.properties.title,
           index: s.properties.index,
+          tables: s.tables?.map((t) => ({
+            tableId: t.tableId,
+            name: t.name,
+            columns: t.columnProperties?.map((c) => ({
+              index: c.columnIndex,
+              name: c.columnName,
+              type: c.columnType,
+            })),
+          })),
         })),
       };
     },
@@ -361,7 +370,7 @@ export const sheetsTools = {
   read_sheet: {
     product: 'sheets' as const,
     scopes: ['https://www.googleapis.com/auth/drive.file'],
-    description: 'Read data from a spreadsheet range',
+    description: 'Read data from a spreadsheet range. Only works with file IDs authorized for this integration.',
     parameters: z.object({
       spreadsheetId: z.string().describe('The spreadsheet ID'),
       range: z.string().describe('A1 notation range (e.g., "Sheet1!A1:D10" or "A1:D10")'),
@@ -381,12 +390,12 @@ export const sheetsTools = {
   write_sheet: {
     product: 'sheets' as const,
     scopes: ['https://www.googleapis.com/auth/drive.file'],
-    description: 'Write data to a spreadsheet range (overwrites existing data)',
+    description: 'Write data to a spreadsheet range (overwrites existing data). Only works with file IDs authorized for this integration.',
     parameters: z.object({
       spreadsheetId: z.string().describe('The spreadsheet ID'),
       range: z.string().describe('A1 notation range to write to'),
       values: z.array(z.array(z.unknown())).describe('2D array of values to write'),
-      raw: z.boolean().optional().default(false).describe('If true, values are stored as-is without parsing'),
+      raw: z.boolean().optional().describe('If true, values are stored as-is without parsing'),
     }),
     execute: async (context: ToolContext, params: {
       spreadsheetId: string;
@@ -415,20 +424,42 @@ export const sheetsTools = {
   append_rows: {
     product: 'sheets' as const,
     scopes: ['https://www.googleapis.com/auth/drive.file'],
-    description: 'Append rows to the end of a spreadsheet table',
+    description: 'Append rows to a spreadsheet. If tableId is provided, uses table-aware append (respects footers, auto-expands). Without tableId, appends after last row in range.',
     parameters: z.object({
       spreadsheetId: z.string().describe('The spreadsheet ID'),
-      range: z.string().describe('A1 notation range defining the table (e.g., "Sheet1!A:D")'),
+      range: z.string().optional().describe('A1 notation range (e.g., "Sheet1!A:D"). Required if tableId not provided.'),
+      tableId: z.string().optional().describe('Table ID from get_spreadsheet. If provided, appends to table body (footer-aware).'),
       values: z.array(z.array(z.unknown())).describe('2D array of rows to append'),
-      raw: z.boolean().optional().default(false).describe('If true, values are stored as-is'),
+      raw: z.boolean().optional().describe('If true, values are stored as-is (only for range-based append)'),
     }),
     execute: async (context: ToolContext, params: {
       spreadsheetId: string;
-      range: string;
+      range?: string;
+      tableId?: string;
       values: unknown[][];
       raw?: boolean;
     }) => {
       await requireAuthorizedFile(context, params.spreadsheetId);
+
+      if (params.tableId) {
+        // Table-aware append using AppendCellsRequest
+        const result = await sheets.appendRowsToTable(
+          { accessToken: context.accessToken },
+          params.spreadsheetId,
+          params.tableId,
+          params.values
+        );
+        return {
+          spreadsheetId: result.spreadsheetId,
+          appendedRows: params.values.length,
+          method: 'table',
+        };
+      }
+
+      // Range-based append (original behavior)
+      if (!params.range) {
+        throw new Error('Either range or tableId must be provided');
+      }
       const result = await sheets.appendRows(
         { accessToken: context.accessToken },
         params.spreadsheetId,
@@ -442,6 +473,7 @@ export const sheetsTools = {
         updatedRange: result.updates.updatedRange,
         updatedRows: result.updates.updatedRows,
         updatedCells: result.updates.updatedCells,
+        method: 'range',
       };
     },
   },

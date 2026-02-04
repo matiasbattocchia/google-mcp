@@ -33,6 +33,15 @@ type Bindings = Env & {
   ENCRYPTION_KEY: string; // AES-256 key for encrypting OAuth tokens (required)
 };
 
+// Extract project number from Client ID (format: {project_number}-{random}.apps.googleusercontent.com)
+function getAppIdFromClientId(clientId: string): string {
+  const match = clientId.match(/^(\d+)-/);
+  if (!match) {
+    throw new Error('Invalid GOOGLE_CLIENT_ID format: expected {project_number}-{random}.apps.googleusercontent.com');
+  }
+  return match[1];
+}
+
 const app = new Hono<{ Bindings: Bindings }>();
 
 // CORS for MCP clients
@@ -176,6 +185,7 @@ app.get('/auth/files', async (c) => {
     state,
     oauthToken: record.google_access_token,
     clientId: c.env.GOOGLE_CLIENT_ID,
+    appId: getAppIdFromClientId(c.env.GOOGLE_CLIENT_ID),
   }));
 });
 

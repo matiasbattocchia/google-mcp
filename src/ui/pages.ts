@@ -387,13 +387,14 @@ export function renderHomePage(): string {
         </div>
         <div class="feature">
           <h3>Sheets</h3>
-          <p><code>get_spreadsheet</code> - Get spreadsheet metadata</p>
+          <p><code>list_authorized_files</code> - List authorized files</p>
+          <p><code>get_spreadsheet</code> - Get metadata and tables</p>
           <p><code>get_sheet_schema</code> - Get column names and types</p>
           <p><code>describe_sheet</code> - Get statistical summary</p>
           <p><code>search_rows</code> - Search rows with filters</p>
           <p><code>read_sheet</code> - Read data from ranges</p>
           <p><code>write_sheet</code> - Write data to ranges</p>
-          <p><code>append_rows</code> - Append rows to tables</p>
+          <p><code>append_rows</code> - Append rows (supports Tables)</p>
           <p><code>create_spreadsheet</code> - Create new spreadsheets</p>
         </div>
       </div>
@@ -727,10 +728,10 @@ export function renderPrivacyPolicy(): string {
     <h2 id="collect">What we collect</h2>
     <p>When you use OpenBSP MCP, we store:</p>
     <ul>
-      <li><strong>API Key</strong> - A randomly generated 256-bit key to authenticate your MCP client</li>
-      <li><strong>OAuth Tokens</strong> - Access and refresh tokens from Google to make API calls on your behalf</li>
+      <li><strong>API key</strong> - A randomly generated 256-bit key to authenticate your MCP client</li>
+      <li><strong>OAuth tokens</strong> - Access and refresh tokens from Google to make API calls on your behalf</li>
       <li><strong>Scopes</strong> - Which Google products you authorized (Calendar, Sheets)</li>
-      <li><strong>Authorized Files</strong> - IDs and names of Google Drive files you selected to share</li>
+      <li><strong>Authorized files</strong> - IDs and names of Google Drive files you selected to share</li>
     </ul>
 
     <h2 id="not-collect">What we don't collect</h2>
@@ -884,6 +885,7 @@ export function renderFilePickerPage(options: {
   state: string;
   oauthToken: string;
   clientId: string;
+  appId: string;
 }): string {
   return `<!DOCTYPE html>
 <html lang="en">
@@ -945,6 +947,7 @@ export function renderFilePickerPage(options: {
     const state = '${options.state}';
     const oauthToken = '${options.oauthToken}';
     const clientId = '${options.clientId}';
+    const appId = '${options.appId}';
 
     let selectedFiles = [];
 
@@ -991,7 +994,7 @@ export function renderFilePickerPage(options: {
 
         const picker = new google.picker.PickerBuilder()
           .setOAuthToken(oauthToken)
-          .setDeveloperKey('')  // Not needed with OAuth token
+          .setAppId(appId)  // Required for drive.file scope to grant access
           .addView(new google.picker.DocsView()
             .setIncludeFolders(false)
             .setMimeTypes('application/vnd.google-apps.spreadsheet'))

@@ -143,8 +143,10 @@ export const calendar = {
 // Sheets API
 export const sheets = {
   async getSpreadsheet(options: GoogleApiOptions, spreadsheetId: string) {
+    // Request sheets.tables to include table information
+    const fields = 'spreadsheetId,properties.title,sheets.properties,sheets.tables';
     const response = await googleFetch(
-      `${SHEETS_API}/spreadsheets/${encodeURIComponent(spreadsheetId)}`,
+      `${SHEETS_API}/spreadsheets/${encodeURIComponent(spreadsheetId)}?fields=${encodeURIComponent(fields)}`,
       options
     );
     return handleResponse<Spreadsheet>(response);
@@ -192,6 +194,42 @@ export const sheets = {
       }
     );
     return handleResponse<AppendValuesResponse>(response);
+  },
+
+  async appendRowsToTable(
+    options: GoogleApiOptions,
+    spreadsheetId: string,
+    tableId: string,
+    values: unknown[][]
+  ) {
+    // Convert values to RowData format for AppendCellsRequest
+    const rows = values.map((row) => ({
+      values: row.map((cell) => ({
+        userEnteredValue: typeof cell === 'number'
+          ? { numberValue: cell }
+          : typeof cell === 'boolean'
+          ? { boolValue: cell }
+          : { stringValue: String(cell ?? '') },
+      })),
+    }));
+
+    const response = await googleFetch(
+      `${SHEETS_API}/spreadsheets/${encodeURIComponent(spreadsheetId)}:batchUpdate`,
+      options,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          requests: [{
+            appendCells: {
+              tableId,
+              rows,
+              fields: 'userEnteredValue',
+            },
+          }],
+        }),
+      }
+    );
+    return handleResponse<BatchUpdateResponse>(response);
   },
 
   async createSpreadsheet(options: GoogleApiOptions, title: string) {
@@ -285,10 +323,30 @@ export interface FreeBusyResponse {
 
 export type SendUpdates = 'all' | 'externalOnly' | 'none';
 
+export interface SpreadsheetTable {
+  tableId: string;
+  name: string;
+  range: {
+    sheetId: number;
+    startRowIndex: number;
+    endRowIndex: number;
+    startColumnIndex: number;
+    endColumnIndex: number;
+  };
+  columnProperties?: {
+    columnIndex: number;
+    columnName?: string;
+    columnType?: string;
+  }[];
+}
+
 export interface Spreadsheet {
   spreadsheetId: string;
   properties: { title: string };
-  sheets: { properties: { sheetId: number; title: string; index: number } }[];
+  sheets: {
+    properties: { sheetId: number; title: string; index: number };
+    tables?: SpreadsheetTable[];
+  }[];
 }
 
 export interface SheetValues {
@@ -309,4 +367,9 @@ export interface AppendValuesResponse {
   spreadsheetId: string;
   tableRange: string;
   updates: UpdateValuesResponse;
+}
+
+export interface BatchUpdateResponse {
+  spreadsheetId: string;
+  replies: unknown[];
 }
