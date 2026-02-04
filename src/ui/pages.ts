@@ -1,11 +1,25 @@
 import type { GOOGLE_SCOPES } from '../auth/google.ts';
 
 const baseStyles = `
+  :root {
+    --background: oklch(0.98 0.01 95.1);
+    --foreground: oklch(0.34 0.03 95.72);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.19 0 106.59);
+    --primary: oklch(0.62 0.14 39.04);
+    --primary-hover: oklch(0.55 0.14 39.04);
+    --primary-foreground: oklch(1 0 0);
+    --muted: oklch(0.93 0.02 90.24);
+    --muted-foreground: oklch(0.55 0.01 97.42);
+    --border: oklch(0.88 0.01 97.36);
+    --success: oklch(0.65 0.15 145);
+    --error: oklch(0.55 0.2 25);
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #0a0a0a;
-    color: #e5e5e5;
+    font-family: Segoe UI, Helvetica Neue, Helvetica, Arial, sans-serif;
+    background: var(--background);
+    color: var(--foreground);
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -15,18 +29,19 @@ const baseStyles = `
   .container {
     max-width: 480px;
     width: 100%;
-    background: #171717;
-    border-radius: 12px;
+    background: var(--card);
+    border-radius: 16px;
     padding: 32px;
-    border: 1px solid #262626;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
   }
   h1 {
     font-size: 24px;
     font-weight: 600;
     margin-bottom: 8px;
+    color: var(--card-foreground);
   }
   .subtitle {
-    color: #a3a3a3;
+    color: var(--muted-foreground);
     margin-bottom: 24px;
   }
   .products {
@@ -40,46 +55,47 @@ const baseStyles = `
     align-items: center;
     gap: 12px;
     padding: 16px;
-    background: #262626;
-    border-radius: 8px;
+    background: var(--muted);
+    border-radius: 12px;
     cursor: pointer;
     transition: background 0.2s;
   }
   .product:hover {
-    background: #333;
+    background: var(--border);
   }
   .product input {
     width: 20px;
     height: 20px;
-    accent-color: #3b82f6;
+    accent-color: var(--primary);
   }
   .product-info {
     flex: 1;
   }
   .product-name {
     font-weight: 500;
+    color: var(--card-foreground);
   }
   .product-desc {
     font-size: 13px;
-    color: #a3a3a3;
+    color: var(--muted-foreground);
   }
   .btn {
     width: 100%;
-    padding: 14px;
-    background: #3b82f6;
-    color: white;
+    padding: 12px 24px;
+    background: var(--primary);
+    color: var(--primary-foreground);
     border: none;
-    border-radius: 8px;
+    border-radius: 9999px;
     font-size: 16px;
     font-weight: 500;
     cursor: pointer;
     transition: background 0.2s;
   }
   .btn:hover {
-    background: #2563eb;
+    background: var(--primary-hover);
   }
   .btn:disabled {
-    background: #404040;
+    opacity: 0.5;
     cursor: not-allowed;
   }
   .expiration {
@@ -88,43 +104,53 @@ const baseStyles = `
   .expiration label {
     display: block;
     margin-bottom: 8px;
-    color: #a3a3a3;
+    color: var(--muted-foreground);
     font-size: 14px;
   }
   .expiration select {
     width: 100%;
     padding: 12px;
-    background: #262626;
-    border: 1px solid #404040;
-    border-radius: 8px;
-    color: #e5e5e5;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    color: var(--foreground);
     font-size: 14px;
     cursor: pointer;
   }
   .expiration select:hover {
-    border-color: #525252;
+    border-color: var(--muted-foreground);
+  }
+  .expiration select:focus {
+    outline: none;
+    border-color: var(--primary);
   }
   .api-key {
-    background: #262626;
+    background: var(--muted);
     padding: 16px;
-    border-radius: 8px;
+    border-radius: 12px;
     font-family: monospace;
     font-size: 14px;
     word-break: break-all;
     margin-top: 16px;
+    color: var(--card-foreground);
   }
   .copy-btn {
-    background: #404040;
+    background: var(--muted);
+    color: var(--foreground);
     margin-top: 16px;
   }
+  .copy-btn:hover {
+    background: var(--border);
+  }
   .config-example {
-    background: #1e1e1e;
+    background: var(--muted);
     padding: 16px;
-    border-radius: 8px;
+    border-radius: 12px;
     font-family: monospace;
     font-size: 12px;
     margin-top: 16px;
     text-align: left;
+    color: var(--card-foreground);
   }
   .config-example pre {
     white-space: pre-wrap;
@@ -133,7 +159,7 @@ const baseStyles = `
   .success-icon {
     width: 64px;
     height: 64px;
-    background: #22c55e;
+    background: var(--success);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -143,7 +169,7 @@ const baseStyles = `
   .error-icon {
     width: 64px;
     height: 64px;
-    background: #ef4444;
+    background: var(--error);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -162,12 +188,12 @@ const baseStyles = `
     justify-content: center;
     gap: 6px;
     margin-top: 24px;
-    color: #a3a3a3;
+    color: var(--muted-foreground);
     font-size: 13px;
     text-decoration: none;
   }
   .footer-link:hover {
-    color: #e5e5e5;
+    color: var(--foreground);
   }
   .footer-links {
     display: flex;
@@ -175,14 +201,14 @@ const baseStyles = `
     align-items: center;
     margin-top: 24px;
     font-size: 13px;
-    color: #a3a3a3;
+    color: var(--muted-foreground);
   }
   .footer-links a {
     color: inherit;
     text-decoration: none;
   }
   .footer-links a:hover {
-    color: #e5e5e5;
+    color: var(--foreground);
   }
   .footer-links span {
     margin: 0 8px;
@@ -199,20 +225,32 @@ const baseStyles = `
     fill: currentColor;
   }
   .error-message {
-    color: #fca5a5;
-    background: #450a0a;
+    color: var(--error);
+    background: oklch(0.95 0.05 25);
     padding: 16px;
-    border-radius: 8px;
+    border-radius: 12px;
     margin-top: 16px;
   }
 `;
 
 const homepageStyles = `
+  :root {
+    --background: oklch(0.98 0.01 95.1);
+    --foreground: oklch(0.34 0.03 95.72);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.19 0 106.59);
+    --primary: oklch(0.62 0.14 39.04);
+    --primary-hover: oklch(0.55 0.14 39.04);
+    --primary-foreground: oklch(1 0 0);
+    --muted: oklch(0.93 0.02 90.24);
+    --muted-foreground: oklch(0.55 0.01 97.42);
+    --border: oklch(0.88 0.01 97.36);
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #0a0a0a;
-    color: #e5e5e5;
+    font-family: Segoe UI, Helvetica Neue, Helvetica, Arial, sans-serif;
+    background: var(--background);
+    color: var(--foreground);
     min-height: 100vh;
     padding: 40px 20px;
     line-height: 1.6;
@@ -229,19 +267,20 @@ const homepageStyles = `
     font-size: 36px;
     font-weight: 700;
     margin-bottom: 16px;
+    color: var(--card-foreground);
   }
   .hero .subtitle {
     font-size: 18px;
-    color: #a3a3a3;
+    color: var(--muted-foreground);
     margin-bottom: 32px;
   }
   .btn {
     display: inline-block;
-    padding: 14px 32px;
-    background: #3b82f6;
-    color: white;
+    padding: 12px 32px;
+    background: var(--primary);
+    color: var(--primary-foreground);
     border: none;
-    border-radius: 8px;
+    border-radius: 9999px;
     font-size: 16px;
     font-weight: 500;
     cursor: pointer;
@@ -249,47 +288,49 @@ const homepageStyles = `
     transition: background 0.2s;
   }
   .btn:hover {
-    background: #2563eb;
+    background: var(--primary-hover);
   }
   .section {
-    background: #171717;
-    border-radius: 12px;
+    background: var(--card);
+    border-radius: 16px;
     padding: 32px;
-    border: 1px solid #262626;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
     margin-bottom: 24px;
   }
   .section h2 {
     font-size: 20px;
     font-weight: 600;
     margin-bottom: 16px;
+    color: var(--card-foreground);
   }
   .section p {
-    color: #a3a3a3;
+    color: var(--muted-foreground);
     margin-bottom: 16px;
   }
   .section ul {
-    color: #d4d4d4;
+    color: var(--foreground);
     padding-left: 24px;
   }
   .section li {
     margin-bottom: 8px;
   }
   .section a {
-    color: #3b82f6;
+    color: var(--primary);
     text-decoration: none;
   }
   .section a:hover {
-    color: #60a5fa;
+    text-decoration: underline;
   }
   .diagram {
-    background: #262626;
-    border-radius: 8px;
+    background: var(--muted);
+    border-radius: 12px;
     padding: 24px;
     font-family: monospace;
     font-size: 14px;
     text-align: center;
     margin: 16px 0;
     overflow-x: auto;
+    color: var(--card-foreground);
   }
   .features {
     display: grid;
@@ -297,25 +338,26 @@ const homepageStyles = `
     gap: 16px;
   }
   .feature {
-    background: #262626;
-    border-radius: 8px;
+    background: var(--muted);
+    border-radius: 12px;
     padding: 20px;
   }
   .feature h3 {
     font-size: 16px;
     font-weight: 600;
     margin-bottom: 8px;
+    color: var(--card-foreground);
   }
   .feature p {
     font-size: 14px;
-    color: #a3a3a3;
+    color: var(--muted-foreground);
     margin: 0 0 6px 0;
   }
   .feature p:last-child {
     margin-bottom: 0;
   }
   .feature code {
-    color: #e5e5e5;
+    color: var(--primary);
     font-size: 13px;
   }
   .footer-links {
@@ -324,14 +366,14 @@ const homepageStyles = `
     align-items: center;
     margin-top: 40px;
     font-size: 13px;
-    color: #a3a3a3;
+    color: var(--muted-foreground);
   }
   .footer-links a {
     color: inherit;
     text-decoration: none;
   }
   .footer-links a:hover {
-    color: #e5e5e5;
+    color: var(--foreground);
   }
   .footer-links span {
     margin: 0 8px;
@@ -653,11 +695,19 @@ export function renderSuccessPageFromFragment(): string {
 }
 
 const legalStyles = `
+  :root {
+    --background: oklch(0.98 0.01 95.1);
+    --foreground: oklch(0.34 0.03 95.72);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.19 0 106.59);
+    --primary: oklch(0.62 0.14 39.04);
+    --muted-foreground: oklch(0.55 0.01 97.42);
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #0a0a0a;
-    color: #e5e5e5;
+    font-family: Segoe UI, Helvetica Neue, Helvetica, Arial, sans-serif;
+    background: var(--background);
+    color: var(--foreground);
     min-height: 100vh;
     padding: 40px 20px;
     line-height: 1.6;
@@ -665,30 +715,31 @@ const legalStyles = `
   .container {
     max-width: 720px;
     margin: 0 auto;
-    background: #171717;
-    border-radius: 12px;
+    background: var(--card);
+    border-radius: 16px;
     padding: 40px;
-    border: 1px solid #262626;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
   }
   h1 {
     font-size: 28px;
     font-weight: 600;
     margin-bottom: 8px;
+    color: var(--card-foreground);
   }
   h2 {
     font-size: 18px;
     font-weight: 600;
     margin-top: 32px;
     margin-bottom: 12px;
-    color: #fff;
+    color: var(--card-foreground);
   }
   .updated {
-    color: #a3a3a3;
+    color: var(--muted-foreground);
     font-size: 14px;
     margin-bottom: 32px;
   }
   p, ul {
-    color: #d4d4d4;
+    color: var(--foreground);
     margin-bottom: 16px;
   }
   ul {
@@ -697,8 +748,14 @@ const legalStyles = `
   li {
     margin-bottom: 8px;
   }
+  code {
+    background: oklch(0.93 0.02 90.24);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
   a {
-    color: #3b82f6;
+    color: var(--primary);
     text-decoration: none;
   }
   a:hover {
@@ -707,7 +764,7 @@ const legalStyles = `
   .back {
     display: inline-block;
     margin-top: 32px;
-    color: #a3a3a3;
+    color: var(--muted-foreground);
   }
 `;
 
@@ -904,8 +961,8 @@ export function renderFilePickerPage(options: {
       align-items: center;
       gap: 8px;
       padding: 8px 12px;
-      background: #262626;
-      border-radius: 6px;
+      background: var(--muted);
+      border-radius: 8px;
       margin-bottom: 8px;
     }
     .file-item .name {
@@ -913,18 +970,23 @@ export function renderFilePickerPage(options: {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      color: var(--card-foreground);
     }
     .file-item .remove {
-      color: #a3a3a3;
+      color: var(--muted-foreground);
       cursor: pointer;
       padding: 4px;
     }
     .file-item .remove:hover {
-      color: #ef4444;
+      color: var(--error);
     }
     .picker-btn {
-      background: #404040;
+      background: var(--muted);
+      color: var(--foreground);
       margin-bottom: 16px;
+    }
+    .picker-btn:hover {
+      background: var(--border);
     }
   </style>
   <script type="module" src="https://unpkg.com/@anthropic-ai/claude-code@latest/dist/google-drive-picker.js"></script>
