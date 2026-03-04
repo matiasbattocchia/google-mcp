@@ -478,6 +478,47 @@ export const sheetsTools = {
     },
   },
 
+  semantic_search: {
+    product: 'sheets' as const,
+    scopes: ['https://www.googleapis.com/auth/drive.file'],
+    description: 'Semantic search over spreadsheet rows using AI embeddings. Finds rows by meaning, not exact match. Data is indexed on first use and kept in sync automatically.',
+    parameters: z.object({
+      spreadsheetId: z.string().describe('The spreadsheet ID'),
+      query: z.string().describe('Natural language search query (e.g., "payments over 1000 in January")'),
+      sheetNames: z.array(z.string()).optional().describe('Sheets to search. Omit to search all sheets.'),
+      topK: z.number().optional().default(10).describe('Number of results to return (max 50)'),
+    }),
+    execute: async (context: ToolContext, params: {
+      spreadsheetId: string;
+      query: string;
+      sheetNames?: string[];
+      topK: number;
+    }) => {
+      await requireAuthorizedFile(context, params.spreadsheetId);
+
+      const response = await fetch('https://tag.openbsp.dev/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${context.apiKey}`,
+        },
+        body: JSON.stringify({
+          query: params.query,
+          spreadsheet_id: params.spreadsheetId,
+          sheet_names: params.sheetNames,
+          top_k: params.topK,
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json<{ error?: string }>();
+        throw new Error(err.error || `Semantic search failed: ${response.status}`);
+      }
+
+      return response.json();
+    },
+  },
+
   create_spreadsheet: {
     product: 'sheets' as const,
     scopes: ['https://www.googleapis.com/auth/drive.file'],

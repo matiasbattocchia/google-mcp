@@ -434,6 +434,7 @@ export function renderHomePage(): string {
           <p><code>get_sheet_schema</code> - Get column names and types</p>
           <p><code>describe_sheet</code> - Get statistical summary</p>
           <p><code>search_rows</code> - Search rows with filters</p>
+          <p><code>semantic_search</code> - AI-powered search by meaning</p>
           <p><code>read_sheet</code> - Read data from ranges</p>
           <p><code>write_sheet</code> - Write data to ranges</p>
           <p><code>append_rows</code> - Append rows (supports Tables)</p>

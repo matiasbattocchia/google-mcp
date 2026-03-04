@@ -145,6 +145,7 @@ YOUR_CALLBACK_URL#api_key=gmc_xxx&url=https://g.mcp.openbsp.dev/mcp&email=user@g
 | `get_sheet_schema` | Get column names and inferred types |
 | `describe_sheet` | Get statistical summary of all columns |
 | `search_rows` | Search for rows matching filter criteria |
+| `semantic_search` | AI-powered semantic search over rows (finds by meaning, not exact match) |
 | `read_sheet` | Read data from a range (e.g., "A1:D10") |
 | `write_sheet` | Write data to a range |
 | `append_rows` | Append rows (supports Tables with `tableId` for footer-aware append) |
@@ -153,6 +154,8 @@ YOUR_CALLBACK_URL#api_key=gmc_xxx&url=https://g.mcp.openbsp.dev/mcp&email=user@g
 The `drive.file` scope only grants access to files the user explicitly selects during authentication (via Google Drive Picker) or files created by the app. Use `list_authorized_files` to discover which spreadsheets are available.
 
 **Tables support:** The `get_spreadsheet` tool returns table metadata including `tableId`. Pass this to `append_rows` for proper table-aware appending that respects footers and auto-expands the table.
+
+**Semantic search:** The `semantic_search` tool uses AI embeddings to find rows by meaning. Powered by [TAG](https://github.com/matiasbattocchia/table-augmented-generation).
 
 ## Self-Hosting
 
